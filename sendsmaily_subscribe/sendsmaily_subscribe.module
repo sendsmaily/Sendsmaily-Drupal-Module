@@ -1,0 +1,291 @@
+<?php
+
+/**
+ * @file
+ * This is the core required file for Sendsmaily Subscribe.
+ */
+
+
+/**
+ * Implements hook_init().
+ */
+function sendsmaily_subscribe_init() {
+  drupal_add_js(
+    '(function($){$().ready(function(){
+      //sendsmaily e-mail js validate
+      $("#block-block-6 form").prepend(\'<div id="block-block-6-errors"></div>\');
+      $("#block-block-6 form").submit(function(e){
+        if(!validateEmail($("input[name$=\'email\']").val())){
+          e.preventDefault();
+          $("#block-block-6-errors").html(Drupal.t("Incorrect email address provided!"));
+        }
+      });
+    });})(jQuery);
+    //js validate function
+    function validateEmail($email) {  var emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/; return emailReg.test( $email );}',
+  'inline');
+}
+
+/**
+ * Implements hook_menu().
+ */
+function sendsmaily_subscribe_menu() {
+  $items = array();
+
+  $items['admin/config/people/sendsmaily'] = array(
+    'title' => 'Sendsmaily',
+    'description' => 'Sendsmaily integration configuration.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sendsmaily_subscribe_configuration_page', NULL),
+    'access arguments' => array('administer sendsmaily'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function sendsmaily_subscribe_permission() {
+  return array(
+    'administer sendsmaily' => array(
+      'title' => t('Administer sendsmaily'),
+    ),
+  );
+}
+
+/**
+ * Admin form for setting domain and key.
+ */
+function sendsmaily_subscribe_configuration_page() {
+  $form = array();
+  
+  $form['sendsmaily_options'] = array(
+	'#title' => t('Subscription options'),
+	'#type' => 'textarea',
+	'#description' => t ('List of key-value pairs on separated rows, that will be displayed on the registration form as checkboxes. ie. subscription1|Main news'),
+	'#default_value' => variable_get('sendsmaily_options', ''),
+  );
+
+  $form['sendsmaily_domain'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Domain'),
+    '#default_value' => variable_get('sendsmaily_domain', ''),
+    '#required' => TRUE,
+  );
+
+  $form['sendsmaily_key'] = array(
+    '#type' => 'textfield',
+    '#title' => t('API Key'),
+    '#default_value' => variable_get('sendsmaily_key', ''),
+    '#required' => TRUE,
+  );
+  
+  $form['sendsmaily_autoresponder'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Autoresponder'),
+    '#default_value' => variable_get('sendsmaily_autoresponder', 1),
+    '#required' => TRUE,
+  );
+
+  $form['sendsmaily_button_title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Subscribe button title'),
+    '#default_value' => variable_get('sendsmaily_button_title', 'Subscribe to newsletter'),
+    '#required' => TRUE,
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function sendsmaily_subscribe_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'user_register_form') {
+    // Add the fieldset.
+    $form['sendsmaily'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Subscribe to newsletter'),
+      '#weight' => 10,
+    );
+    // Add the checkbox to the fieldset.
+    $form['sendsmaily']['sendsmaily'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Subscribe to our newsletter'),
+    );
+    // Add submit function.
+    $form['#submit'][] = 'sendsmaily_subscribe_json_submit';
+  }
+}
+
+/**
+ * Callback for sendsmaily_subscribe_form_alter().
+ */
+function sendsmaily_subscribe_json_submit($form, &$form_state) {
+  if ($form_state['values']['sendsmaily'] === 1) {
+    $json = _sendsmaily_subscribe_curl($form_state['values']['mail']);
+  }
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function sendsmaily_subscribe_block_info() {
+  $blocks = array();
+
+  $blocks['sendsmaily'] = array(
+    'info' => t('Sendsmaily'),
+  );
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_form().
+ */
+function sendsmaily_subscribe_form($form, &$form_state) {
+  $form['response'] = array(
+    '#markup' => '<div id="sendsmaily-response"></div><a name="newsletter"></a>',
+  );
+
+  $form['name'] = array(
+    '#title' => t('Name:'),
+    '#type' => 'textfield',
+    '#size' => FALSE,
+    '#attributes' => array('placeholder' => t('Name')),
+  );
+
+  $form['email'] = array(
+    '#title' => t('Email:'),
+    '#type' => 'textfield',
+    '#size' => FALSE,
+    '#attributes' => array('placeholder' => t('Email')),
+  );
+  
+  if (variable_get('sendsmaily_options', '')) {
+	$options = array();
+	foreach (explode("\n", variable_get('sendsmaily_options', '')) as $line) {
+		$values = explode("|", $line);
+		$options[trim($values[0])] = trim($values[1]);
+	}
+    $form['categories'] = array(
+      '#type' => 'checkboxes',
+      '#options' => $options,
+	  '#default_value' => array_keys($options),
+      '#title' => t('Pick which news and updates you would like to receive:'),
+     );
+  }
+
+  $form['join'] = array(
+    '#type' => 'submit',
+    '#value' => t(variable_get('sendsmaily_button_title', 'Subscribe to newsletter')),
+    '#ajax' => array(
+      'callback' => 'sendsmaily_subscribe_form_callback',
+      'wrapper' => 'sendsmaily-response',
+    ),
+  );
+  return $form;
+}
+
+/**
+ * Subcsribe form callback.
+ */
+function sendsmaily_subscribe_form_callback($form, &$form_state) {
+  if (!valid_email_address($form_state['values']['email'])) {
+    return '<div id="sendsmaily-response">' . t('The e-mail address you specified is not valid.') . '</div>';
+  }
+  else {
+    $response = _sendsmaily_subscribe_curl($form_state['values']['email'], $form_state['values']['name'], $form_state['values']['categories']);
+    if ($response === TRUE) {
+      return '<div id="sendsmaily-response"><script>jQuery("#sendsmaily-subscribe-form .form-item-email, #sendsmaily-subscribe-form .form-item-name, #sendsmaily-subscribe-form .form-item-categories, #edit-join").remove();</script>' . t('You have successfully subscribed!') . '</div>';
+    }
+    else {
+      return '<div id="sendsmaily-response"><script>jQuery("#sendsmaily-subscribe-form .form-item-email, #sendsmaily-subscribe-form .form-item-name, #edit-join").remove();</script>' . $response . '</div>';
+    }
+  }
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function sendsmaily_subscribe_block_view($delta = '') {
+  $block = array();
+
+  switch ($delta) {
+    case 'sendsmaily':
+      $sendsmaily_domain = variable_get('sendsmaily_domain', '');
+      $sendsmaily_key = variable_get('sendsmaily_key', '');
+
+      $block['subject'] = t('Subscribe to our newsletter');
+      if (strlen($sendsmaily_domain) && $sendsmaily_key) {
+        $block['content'] = drupal_get_form('sendsmaily_subscribe_form');
+      }
+      else {
+        $block['content'] = t("No domain or key found. Please !configure Sendsmaily Subscribe!", array('!configure' => l(t('configure'), 'admin/config/people/sendsmaily')));
+      }
+
+      break;
+  }
+
+  return $block;
+}
+
+/**
+ * Sendsmaily curl post.
+ */
+function _sendsmaily_subscribe_curl($mail, $name = '', $categories = array()) {
+  $array = array(
+    'key' => variable_get('sendsmaily_key', ''),
+    'autoresponder' => variable_get('sendsmaily_autoresponder', 1),
+    'remote' => 1,
+    'email' => $mail,
+  );
+  if (!empty($name)) {
+    $array['name'] = $name;
+  }
+  if (count($categories) > 0) {
+	$options = array();
+	foreach (explode("\n", variable_get('sendsmaily_options', '')) as $line) {
+		$values = explode("|", $line);
+		if ($categories[trim($values[0])]) {
+			$array['category_' . trim($values[0])] = 1;
+		} else {
+			$array['category_' . trim($values[0])] = 0;
+		}
+	}
+  }
+
+  $query = http_build_query($array);
+  $ch = curl_init();
+  curl_setopt($ch, CURLOPT_URL, 'https://' . variable_get('sendsmaily_domain', '') . '.sendsmaily.net/api/opt-in/');
+  curl_setopt($ch, CURLOPT_POST, TRUE);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, $query);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+  curl_setopt($ch, CURLOPT_HEADER, FALSE);
+
+  $response = curl_exec($ch);
+  $result = array();
+  $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+  curl_close($ch);
+
+  if ($http_code !== 200) {
+    return t('Could not subscribe! Check domain in Sendsmaily configuration.');
+  }
+  else {
+    // Parse response.
+    $response = json_decode($response);
+
+    if ($response->code >= 200) {
+      watchdog('sendsmaily', $response->message . '<br />' . nl2br(print_r((array_merge(array('query_parameters' => $array), array('response' => (array) $response))), TRUE)), array(), WATCHDOG_NOTICE);
+      if (isset($response->message)) {
+        return t('Could not subscribe!') . ' ' . t($response->message);
+      }
+      return t('Could not subscribe!');
+    }
+    else {
+      return TRUE;
+    }
+  }
+}

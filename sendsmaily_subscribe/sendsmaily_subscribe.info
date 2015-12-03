@@ -1,0 +1,5 @@
+name = Sendsmaily Subscribe
+description = "Sendsmaily integration."
+core = 7.x
+package = Sendsmaily
+configure = admin/config/people/sendsmaily
