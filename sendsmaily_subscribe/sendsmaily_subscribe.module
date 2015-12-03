@@ -6,11 +6,11 @@
  */
 
 /**
- * Implements hook_init().
+ * Implements hook_page_build().
  *
  * @todo The block is not 6'th block always.
  */
-function sendsmaily_subscribe_init() {
+function sendsmaily_subscribe_page_build(&$page) {
   drupal_add_js('(function($){$().ready(function(){
       //sendsmaily e-mail js validate
       $("#block-block-6 form").prepend(\'<div id="block-block-6-errors"></div>\');
