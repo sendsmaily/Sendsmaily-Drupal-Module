@@ -61,12 +61,12 @@ function sendsmaily_subscribe_permission() {
  */
 function sendsmaily_subscribe_configuration_page() {
   $form = array();
-  
+
   $form['sendsmaily_options'] = array(
-	'#title' => t('Subscription options'),
-	'#type' => 'textarea',
-	'#description' => t ('List of key-value pairs on separated rows, that will be displayed on the registration form as checkboxes. ie. subscription1|Main news'),
-	'#default_value' => variable_get('sendsmaily_options', ''),
+    '#title' => t('Subscription options'),
+    '#type' => 'textarea',
+    '#description' => t('List of key-value pairs on separated rows, that will be displayed on the registration form as checkboxes. ie. subscription1|Main news'),
+    '#default_value' => variable_get('sendsmaily_options', ''),
   );
 
   $form['sendsmaily_domain'] = array(
@@ -82,7 +82,7 @@ function sendsmaily_subscribe_configuration_page() {
     '#default_value' => variable_get('sendsmaily_key', ''),
     '#required' => TRUE,
   );
-  
+
   $form['sendsmaily_autoresponder'] = array(
     '#type' => 'textfield',
     '#title' => t('Autoresponder'),
@@ -164,19 +164,19 @@ function sendsmaily_subscribe_form($form, &$form_state) {
     '#size' => FALSE,
     '#attributes' => array('placeholder' => t('Email')),
   );
-  
+
   if (variable_get('sendsmaily_options', '')) {
-	$options = array();
-	foreach (explode("\n", variable_get('sendsmaily_options', '')) as $line) {
-		$values = explode("|", $line);
-		$options[trim($values[0])] = trim($values[1]);
-	}
+    $options = array();
+    foreach (explode("\n", variable_get('sendsmaily_options', '')) as $line) {
+      $values = explode("|", $line);
+      $options[trim($values[0])] = trim($values[1]);
+    }
     $form['categories'] = array(
       '#type' => 'checkboxes',
       '#options' => $options,
-	  '#default_value' => array_keys($options),
+      '#default_value' => array_keys($options),
       '#title' => t('Pick which news and updates you would like to receive:'),
-     );
+    );
   }
 
   $form['join'] = array(
@@ -191,7 +191,7 @@ function sendsmaily_subscribe_form($form, &$form_state) {
 }
 
 /**
- * Subcsribe form callback.
+ * Subscribe form callback.
  */
 function sendsmaily_subscribe_form_callback($form, &$form_state) {
   if (!valid_email_address($form_state['values']['email'])) {
@@ -247,15 +247,16 @@ function _sendsmaily_subscribe_curl($mail, $name = '', $categories = array()) {
     $array['name'] = $name;
   }
   if (count($categories) > 0) {
-	$options = array();
-	foreach (explode("\n", variable_get('sendsmaily_options', '')) as $line) {
-		$values = explode("|", $line);
-		if ($categories[trim($values[0])]) {
-			$array['category_' . trim($values[0])] = 1;
-		} else {
-			$array['category_' . trim($values[0])] = 0;
-		}
-	}
+    $options = explode("\n", variable_get('sendsmaily_options', ''));
+    foreach ($options as $line) {
+      $values = explode("|", $line);
+      if ($categories[trim($values[0])]) {
+        $array['category_' . trim($values[0])] = 1;
+      }
+      else {
+        $array['category_' . trim($values[0])] = 0;
+      }
+    }
   }
 
   $query = http_build_query($array);
@@ -267,7 +268,6 @@ function _sendsmaily_subscribe_curl($mail, $name = '', $categories = array()) {
   curl_setopt($ch, CURLOPT_HEADER, FALSE);
 
   $response = curl_exec($ch);
-  $result = array();
   $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
   curl_close($ch);
 
