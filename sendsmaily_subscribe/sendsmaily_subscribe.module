@@ -5,13 +5,13 @@
  * This is the core required file for Sendsmaily Subscribe.
  */
 
-
 /**
  * Implements hook_init().
+ *
+ * @todo The block is not 6'th block always.
  */
 function sendsmaily_subscribe_init() {
-  drupal_add_js(
-    '(function($){$().ready(function(){
+  drupal_add_js('(function($){$().ready(function(){
       //sendsmaily e-mail js validate
       $("#block-block-6 form").prepend(\'<div id="block-block-6-errors"></div>\');
       $("#block-block-6 form").submit(function(e){
@@ -21,6 +21,7 @@ function sendsmaily_subscribe_init() {
         }
       });
     });})(jQuery);
+
     //js validate function
     function validateEmail($email) {  var emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/; return emailReg.test( $email );}',
   'inline');
