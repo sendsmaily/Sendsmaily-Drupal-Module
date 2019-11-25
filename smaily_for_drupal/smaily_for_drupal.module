@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Module file for smaily_for_durpal.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function smaily_for_drupal_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.smaily_for_drupal':
+      return t('
+        <h1>Instructions</h1>
+        <p>Unpack in the <em>modules</em> folder (currently in the root of your Drupal 8 installation) and enable in <strong>/admin/modules</strong>.</p>
+        <p>Then, visit <strong>/admin/config/smaily_for_drupal/admin</strong> and enter your Smaily API credentials.</p>
+        <p>Last, visit <strong>/admin/structure/block</strong></p>
+        <p>There pick a location and add \'Smaily Newsletter\' to you preferred position.</p>
+      ');
+  }
+}
