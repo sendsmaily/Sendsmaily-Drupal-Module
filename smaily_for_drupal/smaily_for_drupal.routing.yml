@@ -1,7 +1,7 @@
 smaily_for_drupal_form:
   path: '/smaily-subscribe'
   defaults:
-    _form: '\Drupal\smaily_for_drupal\Form\SubscribeForm'
+    _form: '\Drupal\smaily_for_drupal\Form\SmailyForDrupalForm'
     _title: 'Smaily for Drupal Opt-in'
   requirements:
     _permission: 'access content'
@@ -9,7 +9,7 @@ smaily_for_drupal_form:
 smaily_for_drupal.admin_settings_form:
   path: '/admin/config/smaily_for_drupal/admin'
   defaults:
-    _form: '\Drupal\smaily_for_drupal\Form\AdminForm'
+    _form: '\Drupal\smaily_for_drupal\Form\SmailyForDrupalAdminForm'
     _title: 'Smaily for Drupal Admin'
   requirements:
     _permission: 'access administration pages'
