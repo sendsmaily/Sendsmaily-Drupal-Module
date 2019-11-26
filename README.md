@@ -18,7 +18,7 @@ Opening new issues and submitting pull requests are welcome.
 
 ## Installation
 
-- Place smaily_for_drupal (Drupal 7/8 respectively) in core/modules/ folder.
+- Place smaily_for_drupal into core/modules/ folder.
 - Install module under Extend.
 - Validate and save your credentials.
 - Go to Structure -> Block layout.
