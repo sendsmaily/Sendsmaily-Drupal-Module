@@ -117,7 +117,7 @@ class SmailyForDrupalAdminForm extends ConfigFormBase {
       '#title' => $this->t('Autoresponder'),
       '#options' => $autoresponder_list,
       '#default_value' => $config->get('smaily_autoresponder', 1),
-      '#required' => FALSE,
+      '#empty_option' => $this->t('Select autoresponder'),
     ];
 
     $form['smaily_container']['smaily_button_title'] = [
