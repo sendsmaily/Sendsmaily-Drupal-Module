@@ -86,7 +86,7 @@ class SmailyForDrupalAdminForm extends ConfigFormBase {
         'callback' => '::validateCredentials',
         'wrapper' => 'smaily-wrapper',
       ],
-      // Limit errors here, validateCredentials also highlights errors in autoresponder/title.
+      // Limit errors here, validateCredentials will highlight errors in autoresponder/title.
       '#limit_validation_errors' => [],
     ];
 
@@ -96,7 +96,9 @@ class SmailyForDrupalAdminForm extends ConfigFormBase {
 
     // Fetch and update autoresponders every time form is built.
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, 'https://' . $domain . '.sendsmaily.net/api/workflows.php?trigger_type=form_submitted');
+    curl_setopt($ch, CURLOPT_URL,
+      'https://' . $domain . '.sendsmaily.net/api/workflows.php?trigger_type=form_submitted'
+    );
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
     curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
     curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
@@ -204,7 +206,9 @@ class SmailyForDrupalAdminForm extends ConfigFormBase {
     $subdomain = preg_replace('/[^a-zA-Z0-9]+/', '', $subdomain);
 
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, 'https://' . $subdomain . '.sendsmaily.net/api/workflows.php?trigger_type=form_submitted');
+    curl_setopt($ch, CURLOPT_URL,
+      'https://' . $subdomain . '.sendsmaily.net/api/workflows.php?trigger_type=form_submitted'
+    );
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
     curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
     curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");

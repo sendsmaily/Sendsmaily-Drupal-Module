@@ -103,18 +103,24 @@ class SmailyForDrupalForm extends FormBase {
             return;
 
           case 205:
-            $this->messenger()->addWarning($this->t('Could not add to subscriber list for an unknown reason. Probably something in Smaily.'));
+            $this->messenger()->addWarning($this->t(
+              'Could not add to subscriber list for an unknown reason. Probably something in Smaily.'
+            ));
             return;
 
           default:
             $this->messenger()->addError($this->t('Something went wrong.'));
-            $this->logger('smaily')->error(nl2br(print_r((array_merge(['query_parameters' => $query_data], ['response' => (array) $response])), TRUE)));
+            $this->logger('smaily')->error(nl2br(print_r(
+              array_merge(['query_parameters' => $query_data], ['response' => (array) $response]), TRUE
+            )));
             return;
         }
       }
     }
     $this->messenger()->addError($this->t('Something went wrong with connecting to Smaily.'));
-    $this->logger('smaily')->error(nl2br(print_r((array_merge(['query_parameters' => $query_data], ['response' => (array) $response])), TRUE)));
+    $this->logger('smaily')->error(nl2br(print_r(
+      array_merge(['query_parameters' => $query_data], ['response' => (array) $response]), TRUE
+    )));
   }
 
 }
