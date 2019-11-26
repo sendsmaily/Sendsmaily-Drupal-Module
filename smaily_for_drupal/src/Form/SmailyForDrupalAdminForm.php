@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\smaily_for_drupal\Form\SmailyForDrupalAdminForm.
- */
-
 namespace Drupal\smaily_for_drupal\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
@@ -14,7 +9,7 @@ use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 
 /**
- * Newsletter signup admin configuraiton form.
+ * Smaily module admin configuraiton form.
  */
 class SmailyForDrupalAdminForm extends ConfigFormBase {
 
@@ -144,7 +139,7 @@ class SmailyForDrupalAdminForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-
+    // Validation handled by #required and in ajax function.
   }
 
   /**

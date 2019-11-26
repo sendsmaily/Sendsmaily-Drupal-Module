@@ -1,17 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\smaily_for_drupal\Form\SmailyForDrupalForm.
- */
-
 namespace Drupal\smaily_for_drupal\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Newsletter signup form.
+ * Smaily newsletter signup form.
  */
 class SmailyForDrupalForm extends FormBase {
 
@@ -46,9 +41,6 @@ class SmailyForDrupalForm extends FormBase {
       '#value' => $config->get('smaily_button_title', ''),
       '#default_value' => $this->t('Subscribe to newsletter'),
     ];
-
-    $form['#cache']['max-age'] = 0; // Disable cache, remove later.
-
     return $form;
   }
 
