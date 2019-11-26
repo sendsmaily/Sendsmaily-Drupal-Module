@@ -13,12 +13,16 @@ use Drupal\Core\Routing\RouteMatchInterface;
 function smaily_for_drupal_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.smaily_for_drupal':
-      return t('
-        <h1>Instructions</h1>
-        <p>Unpack in the <em>modules</em> folder (currently in the root of your Drupal 8 installation) and enable in <strong>/admin/modules</strong>.</p>
-        <p>Then, visit <strong>/admin/config/smaily_for_drupal/admin</strong> and enter your Smaily API credentials.</p>
-        <p>Last, visit <strong>/admin/structure/block</strong></p>
-        <p>There pick a location and add \'Smaily Newsletter\' to you preferred position.</p>
-      ');
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('The Smaily for Drupal module allows you to integrate the Smaily API for your site. A newsletter subscription block can be configured and placed where possible.<br> More information about Smaily is available at the Smaily <a href=http://help.smaily.com/en/support/home> Knowledgebase.') . '</a></a></p>';
+      $output .= '<h3>' . t('Uses') . '</h3>';
+      $output .= '<dl>';
+      $output .= '<dt>' . t('Configuring Smaily API credentials') . '</dt>';
+      $output .= '<dd>' . t("Fill out and validate the credentials provided to you by Smaily in the administration page.") . '</dd>';
+      $output .= '<dt>' . t('Placing newsletter form') . '</dt>';
+      $output .= '<dd>' . t('To place a newsletter subscription form, go to <b>admin/structure/block</b> and place <b>Smaily Newsletter</b> block to your preferred position.') . '</dd>';
+      $output .= '</dl>';
+      return $output;
   }
 }
