@@ -146,8 +146,23 @@ class SmailyForDrupalAdminForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    // Normalize subdomain.
+    // First, try to parse as full URL.
+    // If that fails, try to parse as subdomain.sendsmaily.net, and, then clean up subdomain and pass as is.
+    $subdomain = trim($form_state->getValue('smaily_domain'));
+    if (filter_var($subdomain, FILTER_VALIDATE_URL)) {
+      $url = parse_url($subdomain);
+      $parts = explode('.', $url['host']);
+      $subdomain = count($parts) >= 3 ? $parts[0] : '';
+    }
+    elseif (preg_match('/^[^\.]+\.sendsmaily\.net$/', $subdomain)) {
+      $parts = explode('.', $subdomain);
+      $subdomain = $parts[0];
+    }
+    $subdomain = preg_replace('/[^a-zA-Z0-9]+/', '', $subdomain);
+    // Save form to config.
     $this->config('smaily_for_drupal.adminsettings')
-      ->set('smaily_domain', trim($form_state->getValue('smaily_domain')))
+      ->set('smaily_domain', $subdomain)
       ->set('smaily_username', trim($form_state->getValue('smaily_username')))
       ->set('smaily_password', trim($form_state->getValue('smaily_password')))
       ->set('smaily_autoresponder', trim($form_state->getValue('smaily_autoresponder')))
@@ -163,10 +178,9 @@ class SmailyForDrupalAdminForm extends ConfigFormBase {
 
     $username = trim($form_state->getValue('smaily_username'));
     $password = trim($form_state->getValue('smaily_password'));
-    $domain = trim($form_state->getValue('smaily_domain'));
-
+    $subdomain = trim($form_state->getValue('smaily_domain'));
     // Drupal's validation is only done with submit.
-    if (empty($username) || empty($password) || empty($domain)) {
+    if (empty($username) || empty($password) || empty($subdomain)) {
       $ajax_response->addCommand(
         new HtmlCommand(
           '.smaily_message',
@@ -175,8 +189,22 @@ class SmailyForDrupalAdminForm extends ConfigFormBase {
       return $ajax_response;
     }
 
+    // Normalize subdomain.
+    // First, try to parse as full URL.
+    // If that fails, try to parse as subdomain.sendsmaily.net, and, then clean up subdomain and pass as is.
+    if (filter_var($subdomain, FILTER_VALIDATE_URL)) {
+      $url = parse_url($subdomain);
+      $parts = explode('.', $url['host']);
+      $subdomain = count($parts) >= 3 ? $parts[0] : '';
+    }
+    elseif (preg_match('/^[^\.]+\.sendsmaily\.net$/', $subdomain)) {
+      $parts = explode('.', $subdomain);
+      $subdomain = $parts[0];
+    }
+    $subdomain = preg_replace('/[^a-zA-Z0-9]+/', '', $subdomain);
+
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, 'https://' . $domain . '.sendsmaily.net/api/workflows.php?trigger_type=form_submitted');
+    curl_setopt($ch, CURLOPT_URL, 'https://' . $subdomain . '.sendsmaily.net/api/workflows.php?trigger_type=form_submitted');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
     curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
     curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
@@ -229,9 +257,9 @@ class SmailyForDrupalAdminForm extends ConfigFormBase {
     $ajax_response->addCommand(new ReplaceCommand(NULL, $form));
 
     $this->config('smaily_for_drupal.adminsettings')
-      ->set('smaily_domain', trim($form_state->getValue('smaily_domain')))
-      ->set('smaily_username', trim($form_state->getValue('smaily_username')))
-      ->set('smaily_password', trim($form_state->getValue('smaily_password')))
+      ->set('smaily_domain', $subdomain)
+      ->set('smaily_username', $username)
+      ->set('smaily_password', $password)
       ->save();
     $ajax_response->addCommand(
       new HtmlCommand(
