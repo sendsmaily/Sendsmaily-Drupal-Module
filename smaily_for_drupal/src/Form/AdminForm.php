@@ -245,7 +245,7 @@ class AdminForm extends ConfigFormBase {
     $domain = $config->get('smaily_api_credentials.domain');
 
     $autoresponder_list = [];
-    if (!empty($domain)) {
+    if (!empty($domain) && !empty($username) && !empty($password)) {
       $ch = curl_init();
       curl_setopt($ch, CURLOPT_URL,
         'https://' . $domain . '.sendsmaily.net/api/workflows.php?trigger_type=form_submitted'
