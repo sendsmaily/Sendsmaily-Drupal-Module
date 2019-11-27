@@ -1,0 +1,6 @@
+name: Smaily for Drupal
+type: module
+description: 'Simple and flexible Smaily integration for Drupal'
+package: Smaily
+core: 8.x
+configure: smaily_for_drupal.admin_settings_form

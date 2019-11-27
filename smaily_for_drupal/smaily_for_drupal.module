@@ -1,0 +1,30 @@
+<?php
+
+/**
+ * @file
+ * Module file for smaily_for_durpal.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function smaily_for_drupal_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.smaily_for_drupal':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('The Smaily for Drupal module allows you to integrate the Smaily API for your site. A newsletter subscription block can be configured and placed where possible.');
+      $output .= '<br>' . t('More information about Smaily is available at the Smaily <a href=":knowledgebase_url">Knowledgebase.</a>', [':knowledgebase_url' => 'http://help.smaily.com/en/support/home']);
+      $output .= '</p>';
+      $output .= '<h3>' . t('Uses') . '</h3>';
+      $output .= '<dl>';
+      $output .= '<dt>' . t('Configuring Smaily API credentials') . '</dt>';
+      $output .= '<dd>' . t('Fill out and validate the credentials provided to you by Smaily in the administration page.') . '</dd>';
+      $output .= '<dt>' . t('Placing newsletter form') . '</dt>';
+      $output .= '<dd>' . t('To place a newsletter subscription form, go to <b>admin/structure/block</b> and place <b>Smaily Newsletter</b> block to your preferred position.') . '</dd>';
+      $output .= '</dl>';
+      return $output;
+  }
+}
