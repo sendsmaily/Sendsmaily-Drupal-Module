@@ -8,7 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 /**
  * Smaily newsletter signup form.
  */
-class SmailyForDrupalForm extends FormBase {
+class SubscribeForm extends FormBase {
 
   /**
    * {@inheritdoc}
@@ -21,7 +21,7 @@ class SmailyForDrupalForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $config = $this->config('smaily_for_drupal.adminsettings');
+    $config = $this->config('smaily_for_drupal.settings');
 
     $form['name'] = [
       '#type' => 'textfield',
@@ -47,37 +47,25 @@ class SmailyForDrupalForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, FormStateInterface $form_state) {
-    // #type => 'email' does validation.
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $config = $this->config('smaily_for_drupal.adminsettings');
+    $config = $this->config('smaily_for_drupal.settings');
 
-    $username = $config->get('smaily_username');
-    $password = $config->get('smaily_password');
-    $domain = $config->get('smaily_domain');
+    $username = $config->get('smaily_api_credentials.username');
+    $password = $config->get('smaily_api_credentials.password');
+    $domain = $config->get('smaily_api_credentials.domain');
 
     $query_data = [
-      'remote' => 1,
-      'email' => $form_state->getValue('email'),
+      'autoresponder' => $config->get('smaily_autoresponder', 1),
+      'addresses' => [
+        [
+          'email' => $form_state->getValue('email'),
+          'name' => $form_state->getValue('name') ?: '',
+        ],
+      ],
     ];
 
-    $name = $form_state->getValue('name');
-    if (!empty($name)) {
-      $query_data['name'] = $name;
-    }
-
-    $autoresponder = $config->get('smaily_autoresponder');
-    if (!empty($autoresponder)) {
-      $query_data['autoresponder'] = $autoresponder;
-    }
-
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, 'https://' . $domain . '.sendsmaily.net/api/opt-in/');
+    curl_setopt($ch, CURLOPT_URL, 'https://' . $domain . '.sendsmaily.net/api/autoresponder.php');
     curl_setopt($ch, CURLOPT_POST, TRUE);
     curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($query_data));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);

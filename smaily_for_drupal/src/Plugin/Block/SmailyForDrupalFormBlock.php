@@ -20,7 +20,7 @@ class SmailyForDrupalFormBlock extends BlockBase {
    */
   public function build() {
     // Include the already created newsletter signup form in a block.
-    $form = \Drupal::formBuilder()->getForm('Drupal\smaily_for_drupal\Form\SmailyForDrupalForm');
+    $form = \Drupal::formBuilder()->getForm('Drupal\smaily_for_drupal\Form\SubscribeForm');
 
     return $form;
   }
