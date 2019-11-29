@@ -6,7 +6,6 @@ use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\HtmlCommand;
-use Drupal\Core\Ajax\ReplaceCommand;
 
 /**
  * Smaily module admin configuraiton form.
@@ -85,26 +84,6 @@ class AdminForm extends ConfigFormBase {
         'callback' => '::validateCredentials',
         'wrapper' => 'smaily-wrapper',
       ],
-      // Limit errors here, validateCredentials will highlight errors in autoresponder/title.
-      '#limit_validation_errors' => [],
-    ];
-
-    $form['smaily_container']['autoresponder'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Autoresponder'),
-      '#options' => $this->fetchAutoresponders(),
-      '#default_value' => $config->get('smaily_autoresponder', 1),
-      '#empty_option' => $this->t('Select autoresponder'),
-      // First time users validating and saving will get illegal autoresponder choice.
-      // Validated needs to be set to TRUE if changing select options with Ajax.
-      '#validated' => TRUE,
-    ];
-
-    $form['smaily_container']['smaily_button_title'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Subscribe button title'),
-      '#default_value' => $config->get('smaily_button_title', 'Subscribe to newsletter'),
-      '#required' => TRUE,
     ];
 
     $form['smaily_container']['submit'] = [
@@ -123,8 +102,6 @@ class AdminForm extends ConfigFormBase {
       ->set('smaily_api_credentials.domain', $this->normalizeSubdomain($subdomain))
       ->set('smaily_api_credentials.username', trim($form_state->getValue('username')))
       ->set('smaily_api_credentials.password', trim($form_state->getValue('password')))
-      ->set('smaily_autoresponder', trim($form_state->getValue('autoresponder')))
-      ->set('smaily_button_title', trim($form_state->getValue('smaily_button_title')))
       ->save();
   }
 
@@ -199,10 +176,6 @@ class AdminForm extends ConfigFormBase {
         '.smaily_message',
         '<div class="messages messages--status">' . 'Credentials valid' . '</div>')
     );
-
-    $form['smaily_container']['autoresponder']['#options'] = $this->fetchAutoresponders();
-    // Refreshes $form to display autoresponders.
-    $ajax_response->addCommand(new ReplaceCommand(NULL, $form));
     return $ajax_response;
   }
 
@@ -230,41 +203,6 @@ class AdminForm extends ConfigFormBase {
     }
     $subdomain = preg_replace('/[^a-zA-Z0-9]+/', '', $subdomain);
     return $subdomain;
-  }
-
-  /**
-   * Ask for a list of autoresponders from Smaily.
-   *
-   * @return array
-   *   Array of autoresponders with an id and title for Form select.
-   */
-  public function fetchAutoresponders() {
-    $config = $this->config('smaily_for_drupal.settings');
-    $username = $config->get('smaily_api_credentials.username');
-    $password = $config->get('smaily_api_credentials.password');
-    $domain = $config->get('smaily_api_credentials.domain');
-
-    $autoresponder_list = [];
-    if (!empty($domain) && !empty($username) && !empty($password)) {
-      $ch = curl_init();
-      curl_setopt($ch, CURLOPT_URL,
-        'https://' . $domain . '.sendsmaily.net/api/workflows.php?trigger_type=form_submitted'
-      );
-      curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-      curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-      curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
-      $autoresponders = json_decode(curl_exec($ch), TRUE);
-      curl_close($ch);
-
-      if (!empty($autoresponders)) {
-        foreach ($autoresponders as $autoresponder) {
-          if (!empty($autoresponder['id']) && !empty($autoresponder['title'])) {
-            $autoresponder_list[$autoresponder['id']] = trim($autoresponder['title']);
-          }
-        }
-      }
-    }
-    return $autoresponder_list;
   }
 
 }
