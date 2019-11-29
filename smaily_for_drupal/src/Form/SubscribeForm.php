@@ -21,7 +21,7 @@ class SubscribeForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $config = $this->config('smaily_for_drupal.settings');
+    $block_config = $form_state->getBuildInfo()['args'][0];
 
     $form['name'] = [
       '#type' => 'textfield',
@@ -38,7 +38,7 @@ class SubscribeForm extends FormBase {
 
     $form['subscribe'] = [
       '#type' => 'submit',
-      '#value' => $config->get('smaily_button_title', ''),
+      '#value' => $block_config['button_title'],
       '#default_value' => $this->t('Subscribe to newsletter'),
     ];
     return $form;
@@ -49,13 +49,14 @@ class SubscribeForm extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $config = $this->config('smaily_for_drupal.settings');
+    $block_config = $form_state->getBuildInfo()['args'][0];
 
     $username = $config->get('smaily_api_credentials.username');
     $password = $config->get('smaily_api_credentials.password');
     $domain = $config->get('smaily_api_credentials.domain');
 
     $query_data = [
-      'autoresponder' => $config->get('smaily_autoresponder', 1),
+      'autoresponder' => $block_config['autoresponder'],
       'addresses' => [
         [
           'email' => $form_state->getValue('email'),
