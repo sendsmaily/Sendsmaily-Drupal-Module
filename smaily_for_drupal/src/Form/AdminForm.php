@@ -113,8 +113,8 @@ class AdminForm extends ConfigFormBase {
     $lines = $form_state->getValue('customfields');
     if (!empty($lines)) {
       foreach (explode("\n", $lines) as $line) {
-        // Match any non-whitespace character with "|" and with any non-whitespace character.
-        if (!preg_match('/[\S+]\|[\S+]/', $line)) {
+        // Match NOT "|" unlimited times until hits "|" then match NOT "|" unlimited times until end.
+        if (!preg_match('/^[^|]*\|[^|]*$/', $line)) {
           $form_state->setErrorByName('customfields', $this->t('Incorrect formatting for at least one custom field line.'));
         }
       }
