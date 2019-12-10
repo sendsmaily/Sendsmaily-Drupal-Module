@@ -109,6 +109,21 @@ class AdminForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    $lines = $form_state->getValue('customfields');
+    if (!empty($lines)) {
+      foreach (explode("\n", $lines) as $line) {
+        // Match any non-whitespace character with "|" and with any non-whitespace character.
+        if (!preg_match('/[\S+]\|[\S+]/', $line)) {
+          $form_state->setErrorByName('customfields', $this->t('Incorrect formatting for at least one custom field line.'));
+        }
+      }
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $subdomain = trim($form_state->getValue('domain'));
     $this->config('smaily_for_drupal.settings')
