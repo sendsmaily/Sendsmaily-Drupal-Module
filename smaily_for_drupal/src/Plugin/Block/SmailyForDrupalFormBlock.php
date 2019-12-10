@@ -46,6 +46,7 @@ class SmailyForDrupalFormBlock extends BlockBase {
       '#default_value' => $this->configuration['smaily_button_title'],
       '#required' => TRUE,
     ];
+
     return $form;
   }
 

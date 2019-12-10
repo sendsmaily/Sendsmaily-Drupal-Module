@@ -1,5 +1,5 @@
 smaily_for_drupal.admin_settings_form:
   title: 'Smaily for Drupal'
   route_name: smaily_for_drupal.admin_settings_form
-  description: 'Configure Smaily API credentials, autoresponders and button title.'
+  description: 'Configure Smaily API credentials and custom fields.'
   parent: system.admin_config_services

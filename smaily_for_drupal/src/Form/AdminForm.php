@@ -86,6 +86,19 @@ class AdminForm extends ConfigFormBase {
       ],
     ];
 
+    $form['smaily_container']['smaily_custom_fields'] = [
+      '#type' => 'fieldset',
+      '#description' => $this->t('List of key-value pairs on separated rows,
+        that will be displayed on the registration form as checkboxes.
+        ie. subscription1|Main news'),
+      '#title' => $this->t('Custom fields'),
+    ];
+
+    $form['smaily_container']['smaily_custom_fields']['customfields'] = [
+      '#type' => 'textarea',
+      '#default_value' => $config->get('smaily_custom_fields', ''),
+    ];
+
     $form['smaily_container']['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Save settings'),
@@ -102,6 +115,7 @@ class AdminForm extends ConfigFormBase {
       ->set('smaily_api_credentials.domain', $this->normalizeSubdomain($subdomain))
       ->set('smaily_api_credentials.username', trim($form_state->getValue('username')))
       ->set('smaily_api_credentials.password', trim($form_state->getValue('password')))
+      ->set('smaily_custom_fields', trim($form_state->getValue('customfields')))
       ->save();
   }
 
