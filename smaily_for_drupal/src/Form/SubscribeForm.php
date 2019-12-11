@@ -22,6 +22,7 @@ class SubscribeForm extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $block_config = $form_state->getBuildInfo()['args'][0];
+    $config = $this->config('smaily_for_drupal.settings');
 
     $form['name'] = [
       '#type' => 'textfield',
@@ -35,6 +36,21 @@ class SubscribeForm extends FormBase {
       '#attributes' => ['placeholder' => $this->t('Email')],
       '#required' => TRUE,
     ];
+
+    if ($config->get('smaily_custom_fields')) {
+      $options = [];
+      foreach (explode("\n", $config->get('smaily_custom_fields', '')) as $line) {
+        $values = explode("|", $line);
+        $options[trim($values[0])] = trim($values[1]);
+      }
+
+      $form['custom_fields'] = [
+        '#type' => 'checkboxes',
+        '#options' => $options,
+        '#default_value' => array_keys($options),
+        '#title' => $this->t('Pick which news and updates you would like to receive:'),
+      ];
+    }
 
     $form['subscribe'] = [
       '#type' => 'submit',
@@ -64,6 +80,13 @@ class SubscribeForm extends FormBase {
         ],
       ],
     ];
+    // Append selected custom options to query.
+    $categories = $form_state->getValue('custom_fields');
+    if ($categories) {
+      foreach ($categories as $key => $value) {
+        $query_data['addresses'][0][$key] = 1;
+      }
+    }
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, 'https://' . $domain . '.sendsmaily.net/api/autoresponder.php');

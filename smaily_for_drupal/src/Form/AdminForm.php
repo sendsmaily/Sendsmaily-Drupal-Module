@@ -86,11 +86,39 @@ class AdminForm extends ConfigFormBase {
       ],
     ];
 
+    $form['smaily_container']['smaily_custom_fields'] = [
+      '#type' => 'fieldset',
+      '#description' => $this->t('List of key-value pairs on separated rows,
+        that will be displayed on the registration form as checkboxes.
+        ie. subscription1|Main news'),
+      '#title' => $this->t('Custom fields'),
+    ];
+
+    $form['smaily_container']['smaily_custom_fields']['customfields'] = [
+      '#type' => 'textarea',
+      '#default_value' => $config->get('smaily_custom_fields', ''),
+    ];
+
     $form['smaily_container']['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Save settings'),
     ];
     return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    $lines = $form_state->getValue('customfields');
+    if (!empty($lines)) {
+      foreach (explode("\n", $lines) as $line) {
+        // Match NOT "|" unlimited times until hits "|" then match NOT "|" unlimited times until end.
+        if (!preg_match('/^[^|]*\|[^|]*$/', $line)) {
+          $form_state->setErrorByName('customfields', $this->t('Incorrect formatting for at least one custom field line.'));
+        }
+      }
+    }
   }
 
   /**
@@ -102,6 +130,7 @@ class AdminForm extends ConfigFormBase {
       ->set('smaily_api_credentials.domain', $this->normalizeSubdomain($subdomain))
       ->set('smaily_api_credentials.username', trim($form_state->getValue('username')))
       ->set('smaily_api_credentials.password', trim($form_state->getValue('password')))
+      ->set('smaily_custom_fields', trim($form_state->getValue('customfields')))
       ->save();
   }
 
