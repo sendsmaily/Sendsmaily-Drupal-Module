@@ -4,6 +4,7 @@ namespace Drupal\smaily_for_drupal\Plugin\Block;
 
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 
 /**
  * Provides a 'Smaily Newsletter form' block.
@@ -23,6 +24,8 @@ class SmailyForDrupalFormBlock extends BlockBase {
     return [
       'smaily_autoresponder' => '',
       'smaily_button_title' => 'Subscribe',
+      'smaily_success_url' => '',
+      'smaily_failure_url' => '',
     ];
   }
 
@@ -46,6 +49,24 @@ class SmailyForDrupalFormBlock extends BlockBase {
       '#default_value' => $this->configuration['smaily_button_title'],
       '#required' => TRUE,
     ];
+
+    $form['success_url'] = [
+      '#type' => 'url',
+      '#title' => $this->t('Success Direct Page'),
+      '#default_value' => $this->configuration['smaily_success_url'],
+      '#attributes' => [
+        'placeholder' => $this->t('Default Success Page'),
+      ],
+    ];
+
+    $form['failure_url'] = [
+      '#type' => 'url',
+      '#title' => $this->t('Failure Direct Page'),
+      '#default_value' => $this->configuration['smaily_failure_url'],
+      '#attributes' => [
+        'placeholder' => $this->t('Default Failure Page'),
+      ],
+    ];
     return $form;
   }
 
@@ -58,6 +79,12 @@ class SmailyForDrupalFormBlock extends BlockBase {
 
     $this->configuration['smaily_button_title']
       = $form_state->getValue('button_title');
+
+    $this->configuration['smaily_success_url']
+      = $form_state->getValue('success_url');
+
+    $this->configuration['smaily_failure_url']
+      = $form_state->getValue('failure_url');
   }
 
   /**
@@ -68,10 +95,31 @@ class SmailyForDrupalFormBlock extends BlockBase {
     $config = [
       'autoresponder' => $this->configuration['smaily_autoresponder'],
       'button_title' => $this->configuration['smaily_button_title'],
+      'success_url' => $this->configuration['smaily_success_url'] ?: $this->getSuccessPath(),
+      'failure_url' => $this->configuration['smaily_failure_url'] ?: $this->getFailurePath(),
     ];
     $form = \Drupal::formBuilder()->getForm('Drupal\smaily_for_drupal\Form\SubscribeForm', $config);
-
     return $form;
+  }
+
+  /**
+   * Get full URL to default success response page.
+   *
+   * @return string
+   *   URL i.e. https://localhost/drupal/smaily_for_drupal/success
+   */
+  public function getSuccessPath() {
+    return Url::fromUri('base:/smaily_for_drupal/success', ['absolute' => TRUE])->toString();
+  }
+
+  /**
+   * Get full URL to default failure response page.
+   *
+   * @return string
+   *   URL i.e. https://localhost/drupal/smaily_for_drupal/failure
+   */
+  public function getFailurePath() {
+    return Url::fromUri('base:/smaily_for_drupal/failure', ['absolute' => TRUE])->toString();
   }
 
   /**
