@@ -15,3 +15,17 @@ smaily_for_drupal.admin_settings_form:
     _permission: 'access administration pages'
   options:
     _admin_route: TRUE
+
+smaily_for_drupal.success:
+  path: '/smaily_for_drupal/success'
+  defaults:
+    _controller: '\Drupal\smaily_for_drupal\Controller\Controller::success'
+  requirements:
+    _permission: 'access page'
+
+smaily_for_drupal.failure:
+  path: '/smaily_for_drupal/failure'
+  defaults:
+    _controller: '\Drupal\smaily_for_drupal\Controller\Controller::failure'
+  requirements:
+    _permission: 'access page'
