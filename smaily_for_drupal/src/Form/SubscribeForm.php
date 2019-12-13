@@ -71,6 +71,7 @@ class SubscribeForm extends FormBase {
     // Disable being able to submit to ".sendsmaily.net".
     if (!empty($config->get('smaily_api_credentials.domain'))) {
       $form['subscribe'] = [
+        // #name 'op' is recognized as a custom field by Smaily, leaving it blank here.
         '#name' => '',
         '#type' => 'submit',
         '#value' => $block_config['button_title'],
@@ -79,7 +80,7 @@ class SubscribeForm extends FormBase {
     }
     // Remove token so as to not send it to Smaily as a field.
     $form['#token'] = FALSE;
-    $form['#after_build'][] = [$this, 'cleanHiddenDrupalInputs'];
+    $form['#after_build'][] = [$this, 'removeHiddenDrupalInputs'];
     return $form;
   }
 
@@ -92,8 +93,14 @@ class SubscribeForm extends FormBase {
 
   /**
    * Remove form_id and form_build_id as to not send them to Smaily as fields.
+   *
+   * @param array $form
+   *   Form after it is built for display.
+   *
+   * @return array
+   *   Form without form_id and form_build_id hidden elements.
    */
-  public function cleanHiddenDrupalInputs($form) {
+  public function removeHiddenDrupalInputs(array $form) {
     $form['form_id']['#access'] = FALSE;
     $form['form_build_id']['#access'] = FALSE;
     return $form;

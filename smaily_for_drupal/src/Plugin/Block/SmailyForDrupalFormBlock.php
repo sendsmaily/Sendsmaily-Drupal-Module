@@ -109,7 +109,7 @@ class SmailyForDrupalFormBlock extends BlockBase {
    *   URL i.e. https://localhost/drupal/smaily_for_drupal/success
    */
   public function getSuccessPath() {
-    return Url::fromUri('base:/smaily_for_drupal/success', ['absolute' => TRUE, 'https' => TRUE])->toString();
+    return Url::fromUri('base:/smaily_for_drupal/success', ['absolute' => TRUE])->toString();
   }
 
   /**
@@ -119,7 +119,7 @@ class SmailyForDrupalFormBlock extends BlockBase {
    *   URL i.e. https://localhost/drupal/smaily_for_drupal/failure
    */
   public function getFailurePath() {
-    return Url::fromUri('base:/smaily_for_drupal/failure', ['absolute' => TRUE, 'https' => TRUE])->toString();
+    return Url::fromUri('base:/smaily_for_drupal/failure', ['absolute' => TRUE])->toString();
   }
 
   /**
