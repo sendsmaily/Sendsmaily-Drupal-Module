@@ -39,7 +39,7 @@ class SubscribeForm extends FormBase {
     ];
 
     $form['autoresponder'] = [
-      '#type' => 'autoresponder',
+      '#type' => 'hidden',
       '#value' => $block_config['autoresponder'],
     ];
 
