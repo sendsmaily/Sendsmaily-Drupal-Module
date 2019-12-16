@@ -53,19 +53,14 @@ class SubscribeForm extends FormBase {
       '#value' => $block_config['failure_url'],
     ];
 
-    if ($config->get('smaily_custom_fields')) {
-      $options = [];
-      foreach (explode("\n", $config->get('smaily_custom_fields', '')) as $line) {
-        $values = explode("|", $line);
-        $options[trim($values[0])] = trim($values[1]);
+    if (!empty($config->get('smaily_custom_fields'))) {
+      $customfields = $this->getCustomFields();
+      foreach ($customfields as $field => $label) {
+        $form['category_' . $field] = [
+          '#type' => 'checkbox',
+          '#title' => $label,
+        ];
       }
-
-      $form['custom_fields'] = [
-        '#type' => 'checkboxes',
-        '#options' => $options,
-        '#default_value' => array_keys($options),
-        '#title' => $this->t('Pick which news and updates you would like to receive:'),
-      ];
     }
 
     // Disable being able to submit to ".sendsmaily.net".
@@ -82,6 +77,22 @@ class SubscribeForm extends FormBase {
     $form['#token'] = FALSE;
     $form['#after_build'][] = [$this, 'removeHiddenDrupalInputs'];
     return $form;
+  }
+
+  /**
+   * Get an array of custom fields from config.
+   *
+   * @return array
+   *   Array of custom fields in format [subscription1 => Main news]
+   */
+  public function getCustomFields() {
+    $config = $this->config('smaily_for_drupal.settings');
+    $options = [];
+    foreach (explode("\n", $config->get('smaily_custom_fields', '')) as $line) {
+      $values = explode("|", $line);
+      $options[trim($values[0])] = trim($values[1]);
+    }
+    return $options;
   }
 
   /**
