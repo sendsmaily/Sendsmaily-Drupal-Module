@@ -1,0 +1,25 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - smaily_for_drupal
+  config:
+    - field.storage.node.field_success_page
+    - node.type.smly_page
+id: node.smly_page.field_success_page
+field_name: field_success_page
+entity_type: node
+bundle: smly_page
+label: 'Success page'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'Success page'
+  off_label: 'Failure page'
+field_type: boolean

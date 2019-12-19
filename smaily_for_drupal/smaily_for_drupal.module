@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Node\Entity\Node;
 
 /**
  * Implements hook_help().
@@ -26,5 +27,59 @@ function smaily_for_drupal_help($route_name, RouteMatchInterface $route_match) {
       $output .= '<dd>' . t('To place a newsletter subscription form, go to <b>admin/structure/block</b> and place <b>Smaily Newsletter</b> block to your preferred position.') . '</dd>';
       $output .= '</dl>';
       return $output;
+  }
+}
+function smaily_for_drupal_install() {
+  // Create default success page.
+  $body = [
+    'value' => 'Thank you for subscribing.',
+    'format' => 'basic_html',
+  ];
+  $node = Node::create([
+    'type' => 'smly_page',
+    'title' => 'Success page',
+    'body' => $body,
+    'uid' => 1,
+    'status' => 1,
+    'promote' => 0,
+    'field_success_page' => 1,
+  ]);
+  $node->enforceIsNew();
+  $node->save();
+
+  // Create default failure page.
+  $body = [
+    'value' => 'Something went wrong subscribing. Try again later.',
+    'format' => 'basic_html',
+  ];
+  $node = Node::create([
+    'type' => 'smly_page',
+    'title' => 'Failure page',
+    'body' => $body,
+    'uid' => 1,
+    'status' => 1,
+    'promote' => 0,
+    'field_success_page' => 0,
+  ]);
+  $node->enforceIsNew();
+  $node->save();
+}
+/**
+* Implements hook_uninstall().
+*/
+function smaily_for_drupal_uninstall() {
+  // Load services.
+  $queryFactory = \Drupal::service('entity.query');
+  $nodeStorage  = \Drupal::entityManager()->getStorage('node');
+
+  // Query all entity.
+  $query = $queryFactory->get('node')
+    ->condition('type', 'smly_page');
+  $nids = $query->execute();
+
+  // Delete entities.
+  if (!empty($nids)) {
+    $entities = $nodeStorage->loadMultiple($nids);
+    $nodeStorage->delete($entities);
   }
 }

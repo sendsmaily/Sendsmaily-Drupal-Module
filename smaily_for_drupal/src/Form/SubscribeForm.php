@@ -4,6 +4,7 @@ namespace Drupal\smaily_for_drupal\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 
 /**
  * Smaily newsletter signup form.
@@ -43,14 +44,15 @@ class SubscribeForm extends FormBase {
       '#value' => $block_config['autoresponder'],
     ];
 
+    $current_url = Url::fromRoute('<current>', [], ['absolute' => 'true'])->toString();
     $form['success_url'] = [
       '#type' => 'hidden',
-      '#value' => $block_config['success_url'],
+      '#value' => $block_config['success_url'] ?: $current_url,
     ];
 
     $form['failure_url'] = [
       '#type' => 'hidden',
-      '#value' => $block_config['failure_url'],
+      '#value' => $block_config['failure_url'] ?: $current_url,
     ];
 
     if (!empty($config->get('smaily_custom_fields'))) {
@@ -76,6 +78,7 @@ class SubscribeForm extends FormBase {
     // Remove token so as to not send it to Smaily as a field.
     $form['#token'] = FALSE;
     $form['#after_build'][] = [$this, 'removeHiddenDrupalInputs'];
+    $this->handleResponseMessage();
     return $form;
   }
 
@@ -115,6 +118,40 @@ class SubscribeForm extends FormBase {
     $form['form_id']['#access'] = FALSE;
     $form['form_build_id']['#access'] = FALSE;
     return $form;
+  }
+
+  /**
+   * Handle and display response messages from Smaily.
+   */
+  public function handleResponseMessage() {
+    $request = \Drupal::request();
+    $message = isset($request->query->all()['message']);
+    $code = isset($request->query->all()['code']);
+
+    if ($message && $code) {
+      switch ((int) $request->query->all()['code']) {
+        case 101:
+          $this->messenger()->addMessage($this->t('You have been successfully subscribed.'), 'status');
+          break;
+
+        case 201:
+          $this->messenger()->addMessage($this->t('Data must be posted with POST method.'), 'error');
+          break;
+
+        case 204:
+          $this->messenger()->addMessage($this->t('Data does not contain a recognizable email address.'), 'warning');
+          break;
+
+        case 205:
+          $this->messenger()->addMessage($this->t(
+            'Could not add to subscriber list for an unknown reason. Probably something in Smaily.'), 'error');
+          break;
+
+        default:
+          $this->messenger()->addMessage($this->t('Something went wrong, try again later.'), 'error');
+          break;
+      }
+    }
   }
 
 }

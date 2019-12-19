@@ -1,0 +1,25 @@
+langcode: en
+status: true
+dependencies:
+    config:
+        - field.field.node.smly_page.body
+        - field.field.node.smly_page.field_success_page
+        - node.type.smly_page
+    module:
+        - text
+        - user
+id: node.smly_page.default
+targetEntityType: node
+bundle: smly_page
+mode: default
+content:
+    body:
+        label: hidden
+        type: text_default
+        weight: 101
+        settings: {  }
+        third_party_settings: {  }
+    links:
+        weight: 100
+hidden:
+  field_success_page: true
