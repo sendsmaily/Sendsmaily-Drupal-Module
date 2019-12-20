@@ -101,14 +101,14 @@ class SmailyForDrupalFormBlock extends BlockBase {
   }
 
   /**
-   * Fetch all success pages of type smly_page (Smaily Response Page)
+   * Fetch all success pages of type smaily_response_page (Smaily Response Page)
    *
    * @return array
    *   Array of response pages in format [url => page title]
    */
   public function getSuccessPages() {
     $query = \Drupal::entityTypeManager()->getStorage('node')->getQuery();
-    $nids = $query->condition('type', 'smly_page')
+    $nids = $query->condition('type', 'smaily_response_page')
       ->condition('status', '1')
       ->execute();
     $nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($nids);
@@ -124,14 +124,14 @@ class SmailyForDrupalFormBlock extends BlockBase {
   }
 
   /**
-   * Fetch all failure pages of type smly_page (Smaily Response Page)
+   * Fetch all failure pages of type smaily_response_page (Smaily Response Page)
    *
    * @return array
    *   Array of response pages in format [url => page title]
    */
   public function getFailurePages() {
     $query = \Drupal::entityTypeManager()->getStorage('node')->getQuery();
-    $nids = $query->condition('type', 'smly_page')
+    $nids = $query->condition('type', 'smaily_response_page')
       ->condition('status', '1')
       ->execute();
     $nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($nids);

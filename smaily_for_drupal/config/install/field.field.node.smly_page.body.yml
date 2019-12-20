@@ -8,11 +8,11 @@ dependencies:
     - text
   config:
     - field.storage.node.body
-    - node.type.smly_page
-id: node.smly_page.body
+    - node.type.smaily_response_page
+id: node.smaily_response_page.body
 field_name: body
 entity_type: node
-bundle: smly_page
+bundle: smaily_response_page
 label: Body
 description: 'Uncheck <em>success page</em> to set as failure page.'
 required: false

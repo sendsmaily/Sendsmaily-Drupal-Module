@@ -5,7 +5,7 @@ dependencies:
     module:
       - smaily_for_drupal
 name: 'Smaily Response Page'
-type: smly_page
+type: smaily_response_page
 description: 'Content type that can be used to create <em>success/failure</em> pages'
 help: ''
 new_revision: false

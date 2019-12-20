@@ -2,25 +2,25 @@ langcode: en
 status: true
 dependencies:
     config:
-        - field.field.node.smly_page.body
-        - field.field.node.smly_page.field_success_page
-        - node.type.smly_page
+        - field.field.node.smaily_response_page.body
+        - field.field.node.smaily_response_page.field_success_page
+        - node.type.smaily_response_page
     module:
         - text
         - user
-id: node.smly_page.default
+id: node.smaily_response_page.default
 targetEntityType: node
-bundle: smly_page
+bundle: smaily_response_page
 mode: default
 content:
     body:
       label: hidden
       type: text_textarea_with_summary
-      weight: 101
+      weight: 110
       settings: {  }
       third_party_settings: {  }
     field_success_page:
-      weight: 102
+      weight: 120
       settings:
         display_label: true
       third_party_settings: {  }

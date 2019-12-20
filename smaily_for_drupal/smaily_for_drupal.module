@@ -29,6 +29,7 @@ function smaily_for_drupal_help($route_name, RouteMatchInterface $route_match) {
       return $output;
   }
 }
+
 function smaily_for_drupal_install() {
   // Create default success page.
   $body = [
@@ -36,7 +37,7 @@ function smaily_for_drupal_install() {
     'format' => 'basic_html',
   ];
   $node = Node::create([
-    'type' => 'smly_page',
+    'type' => 'smaily_response_page',
     'title' => 'Success page',
     'body' => $body,
     'uid' => 1,
@@ -53,7 +54,7 @@ function smaily_for_drupal_install() {
     'format' => 'basic_html',
   ];
   $node = Node::create([
-    'type' => 'smly_page',
+    'type' => 'smaily_response_page',
     'title' => 'Failure page',
     'body' => $body,
     'uid' => 1,
@@ -64,6 +65,7 @@ function smaily_for_drupal_install() {
   $node->enforceIsNew();
   $node->save();
 }
+
 /**
 * Implements hook_uninstall().
 */
@@ -74,7 +76,7 @@ function smaily_for_drupal_uninstall() {
 
   // Query all entity.
   $query = $queryFactory->get('node')
-    ->condition('type', 'smly_page');
+    ->condition('type', 'smaily_response_page');
   $nids = $query->execute();
 
   // Delete entities.
