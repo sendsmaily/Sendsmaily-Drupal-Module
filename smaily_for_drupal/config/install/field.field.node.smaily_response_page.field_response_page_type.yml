@@ -5,10 +5,10 @@ dependencies:
     module:
       - smaily_for_drupal
   config:
-    - field.storage.node.field_success_page
+    - field.storage.node.field_response_page_type
     - node.type.smaily_response_page
-id: node.smaily_response_page.field_success_page
-field_name: field_success_page
+id: node.smaily_response_page.field_response_page_type
+field_name: field_response_page_type
 entity_type: node
 bundle: smaily_response_page
 label: 'Success page'

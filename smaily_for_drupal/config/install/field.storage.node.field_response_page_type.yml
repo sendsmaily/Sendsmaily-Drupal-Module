@@ -7,8 +7,8 @@ dependencies:
   module:
     - node
     - text
-id: node.field_success_page
-field_name: field_success_page
+id: node.field_response_page_type
+field_name: field_response_page_type
 entity_type: node
 type: list_string
 settings:

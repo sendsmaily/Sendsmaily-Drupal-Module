@@ -43,7 +43,7 @@ function smaily_for_drupal_install() {
     'uid' => 1,
     'status' => 1,
     'promote' => 0,
-    'field_success_page' => 1,
+    'field_response_page_type' => 1,
   ]);
   $node->enforceIsNew();
   $node->save();
@@ -60,7 +60,7 @@ function smaily_for_drupal_install() {
     'uid' => 1,
     'status' => 1,
     'promote' => 0,
-    'field_success_page' => 0,
+    'field_response_page_type' => 0,
   ]);
   $node->enforceIsNew();
   $node->save();

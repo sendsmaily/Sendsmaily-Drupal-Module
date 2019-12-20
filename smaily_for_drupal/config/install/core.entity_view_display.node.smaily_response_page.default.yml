@@ -3,7 +3,7 @@ status: true
 dependencies:
     config:
         - field.field.node.smaily_response_page.body
-        - field.field.node.smaily_response_page.field_success_page
+        - field.field.node.smaily_response_page.field_response_page_type
         - node.type.smaily_response_page
     module:
         - text
@@ -22,4 +22,4 @@ content:
     links:
         weight: 100
 hidden:
-  field_success_page: true
+  field_response_page_type: true

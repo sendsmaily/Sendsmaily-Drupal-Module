@@ -115,7 +115,7 @@ class SmailyForDrupalFormBlock extends BlockBase {
 
     $pages = [];
     foreach ($nodes as $node) {
-      if ($node->field_success_page->value == 1) {
+      if ($node->field_response_page_type->value == 1) {
         $url = Url::fromRoute('entity.node.canonical', ['node' => $node->id()], ['absolute' => TRUE]);
         $pages[$url->toString()] = $node->getTitle();
       }
@@ -138,7 +138,7 @@ class SmailyForDrupalFormBlock extends BlockBase {
 
     $pages = [];
     foreach ($nodes as $node) {
-      if ($node->field_success_page->value == 0) {
+      if ($node->field_response_page_type->value == 0) {
         $url = Url::fromRoute('entity.node.canonical', ['node' => $node->id()], ['absolute' => TRUE]);
         $pages[$url->toString()] = $node->getTitle();
       }
