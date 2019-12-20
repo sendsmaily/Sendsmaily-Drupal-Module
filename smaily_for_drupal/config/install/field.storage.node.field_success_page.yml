@@ -10,9 +10,17 @@ dependencies:
 id: node.field_success_page
 field_name: field_success_page
 entity_type: node
-type: text_with_summary
-settings: {  }
-module: text
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: 'Success page'
+      label: 'Success page'
+    -
+      value: 'Failure page'
+      label: 'Failure page'
+  allowed_values_function: ''
+module: options
 locked: false
 cardinality: 1
 translatable: true
