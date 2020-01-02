@@ -11,7 +11,7 @@ id: node.smaily_response_page.field_response_page_type
 field_name: field_response_page_type
 entity_type: node
 bundle: smaily_response_page
-label: 'Success page'
+label: 'Choose response page type'
 description: ''
 required: true
 translatable: false
