@@ -156,7 +156,7 @@ class AdminForm extends ConfigFormBase {
 
     $subdomain = $this->normalizeSubdomain($subdomain);
     $url = 'https://' . $subdomain . '.sendsmaily.net/api/workflows.php?trigger_type=form_submitted';
-    
+
     try {
       $client = \Drupal::httpClient();
       $client->request('GET', $url, [

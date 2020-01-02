@@ -166,10 +166,10 @@ class SmailyForDrupalFormBlock extends BlockBase {
     $full_url = 'https://' . $domain . '.sendsmaily.net/api/workflows.php?trigger_type=form_submitted';
     try {
       $client = \Drupal::httpClient();
-      $request = $client->request('GET', $full_url, [
+      $response = $client->request('GET', $full_url, [
         'auth' => [$username, $password],
       ]);
-      $autoresponders = json_decode($request->getBody(), TRUE);
+      $autoresponders = json_decode($response->getBody(), TRUE);
       if (empty($autoresponders)) {
         return $autoresponder_list;
       }
@@ -180,6 +180,15 @@ class SmailyForDrupalFormBlock extends BlockBase {
       }
     }
     catch (ClientException $e) {
+      $credentials = [
+        '@username' => $username,
+        '@subdomain' => $subdomain,
+      ];
+
+      \Drupal::logger('smaily_for_drupal')->error(
+        'Failed trying to fetch autoresponders from Smaily with subdomain: @subdomain and username: @username',
+        $credentials
+      );
     }
     return $autoresponder_list;
   }
