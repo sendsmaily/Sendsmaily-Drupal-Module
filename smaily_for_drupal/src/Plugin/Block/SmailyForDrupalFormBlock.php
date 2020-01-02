@@ -51,21 +51,19 @@ class SmailyForDrupalFormBlock extends BlockBase {
     ];
 
     $form['success_url'] = [
-      '#type' => 'url',
+      '#type' => 'select',
       '#title' => $this->t('Success Direct Page'),
       '#default_value' => $this->configuration['smaily_success_url'],
-      '#attributes' => [
-        'placeholder' => $this->t('Default Success Page'),
-      ],
+      '#empty_option' => $this->t('Redirect back'),
+      '#options' => $this->getSuccessPages(),
     ];
 
     $form['failure_url'] = [
-      '#type' => 'url',
+      '#type' => 'select',
       '#title' => $this->t('Failure Direct Page'),
       '#default_value' => $this->configuration['smaily_failure_url'],
-      '#attributes' => [
-        'placeholder' => $this->t('Default Failure Page'),
-      ],
+      '#empty_option' => $this->t('Redirect back'),
+      '#options' => $this->getFailurePages(),
     ];
     return $form;
   }
@@ -95,31 +93,57 @@ class SmailyForDrupalFormBlock extends BlockBase {
     $config = [
       'autoresponder' => $this->configuration['smaily_autoresponder'],
       'button_title' => $this->configuration['smaily_button_title'],
-      'success_url' => $this->configuration['smaily_success_url'] ?: $this->getSuccessPath(),
-      'failure_url' => $this->configuration['smaily_failure_url'] ?: $this->getFailurePath(),
+      'success_url' => $this->configuration['smaily_success_url'],
+      'failure_url' => $this->configuration['smaily_failure_url'],
     ];
     $form = \Drupal::formBuilder()->getForm('Drupal\smaily_for_drupal\Form\SubscribeForm', $config);
     return $form;
   }
 
   /**
-   * Get full URL to default success response page.
+   * Fetch all success pages of type smaily_response_page (Smaily Response Page)
    *
-   * @return string
-   *   URL i.e. https://localhost/drupal/smaily_for_drupal/success
+   * @return array
+   *   Array of response pages in format [url => page title]
    */
-  public function getSuccessPath() {
-    return Url::fromUri('base:/smaily_for_drupal/success', ['absolute' => TRUE])->toString();
+  public function getSuccessPages() {
+    $query = \Drupal::entityTypeManager()->getStorage('node')->getQuery();
+    $nids = $query->condition('type', 'smaily_response_page')
+      ->condition('status', '1')
+      ->execute();
+    $nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($nids);
+
+    $pages = [];
+    foreach ($nodes as $node) {
+      if ($node->field_response_page_type->value == 1) {
+        $url = Url::fromRoute('entity.node.canonical', ['node' => $node->id()], ['absolute' => TRUE]);
+        $pages[$url->toString()] = $node->getTitle();
+      }
+    }
+    return $pages;
   }
 
   /**
-   * Get full URL to default failure response page.
+   * Fetch all failure pages of type smaily_response_page (Smaily Response Page)
    *
-   * @return string
-   *   URL i.e. https://localhost/drupal/smaily_for_drupal/failure
+   * @return array
+   *   Array of response pages in format [url => page title]
    */
-  public function getFailurePath() {
-    return Url::fromUri('base:/smaily_for_drupal/failure', ['absolute' => TRUE])->toString();
+  public function getFailurePages() {
+    $query = \Drupal::entityTypeManager()->getStorage('node')->getQuery();
+    $nids = $query->condition('type', 'smaily_response_page')
+      ->condition('status', '1')
+      ->execute();
+    $nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($nids);
+
+    $pages = [];
+    foreach ($nodes as $node) {
+      if ($node->field_response_page_type->value == 0) {
+        $url = Url::fromRoute('entity.node.canonical', ['node' => $node->id()], ['absolute' => TRUE]);
+        $pages[$url->toString()] = $node->getTitle();
+      }
+    }
+    return $pages;
   }
 
   /**

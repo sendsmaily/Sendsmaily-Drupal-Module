@@ -1,0 +1,25 @@
+langcode: en
+status: true
+dependencies:
+    config:
+        - field.field.node.smaily_response_page.body
+        - field.field.node.smaily_response_page.field_response_page_type
+        - node.type.smaily_response_page
+    module:
+        - text
+        - user
+id: node.smaily_response_page.default
+targetEntityType: node
+bundle: smaily_response_page
+mode: default
+content:
+    body:
+        label: hidden
+        type: text_default
+        weight: 110
+        settings: {  }
+        third_party_settings: {  }
+    links:
+        weight: 100
+hidden:
+  field_response_page_type: true

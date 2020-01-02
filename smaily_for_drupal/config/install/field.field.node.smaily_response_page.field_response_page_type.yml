@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - smaily_for_drupal
+  config:
+    - field.storage.node.field_response_page_type
+    - node.type.smaily_response_page
+id: node.smaily_response_page.field_response_page_type
+field_name: field_response_page_type
+entity_type: node
+bundle: smaily_response_page
+label: 'Choose response page type'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

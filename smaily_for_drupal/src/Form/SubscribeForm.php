@@ -4,6 +4,7 @@ namespace Drupal\smaily_for_drupal\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 
 /**
  * Smaily newsletter signup form.
@@ -43,14 +44,15 @@ class SubscribeForm extends FormBase {
       '#value' => $block_config['autoresponder'],
     ];
 
+    $current_url = Url::fromRoute('<current>', [], ['absolute' => 'true'])->toString();
     $form['success_url'] = [
       '#type' => 'hidden',
-      '#value' => $block_config['success_url'],
+      '#value' => $block_config['success_url'] ?: $current_url,
     ];
 
     $form['failure_url'] = [
       '#type' => 'hidden',
-      '#value' => $block_config['failure_url'],
+      '#value' => $block_config['failure_url'] ?: $current_url,
     ];
 
     if (!empty($config->get('smaily_custom_fields'))) {

@@ -27,3 +27,14 @@ Opening new issues and submitting pull requests are welcome.
 - Validate and save your Smaily API credentials.
 - Go to Structure -> Block layout.
 - Place "Smaily Newsletter" block where you wish.
+
+## Success/Failure pages
+- Success and Failure pages can be set in Block Settings.
+- One success and failure page is created by Smaily for use.
+- More pages can be created using the Smaily Response Pages content type.
+- "Redirect back" redirects to last page user was on, handles responses with feedback.
+- Smaily API provides a response via URL arguments, these can be accessed with \Drupal::request()->query->all()['message']
+
+## Troubleshooting
+- No response when placing Smaily Newsletter block
+Install PHP cURL library and restart Apache.
