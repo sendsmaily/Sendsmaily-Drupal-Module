@@ -78,7 +78,6 @@ class SubscribeForm extends FormBase {
     // Remove token so as to not send it to Smaily as a field.
     $form['#token'] = FALSE;
     $form['#after_build'][] = [$this, 'removeHiddenDrupalInputs'];
-    $this->handleResponseMessage();
     return $form;
   }
 
@@ -118,42 +117,6 @@ class SubscribeForm extends FormBase {
     $form['form_id']['#access'] = FALSE;
     $form['form_build_id']['#access'] = FALSE;
     return $form;
-  }
-
-  /**
-   * Handle and display response messages from Smaily.
-   */
-  public function handleResponseMessage() {
-    $request = \Drupal::request()->query->all();
-    $message = isset($request['message']) ? trim($request['message']) : NULL;
-    $code = isset($request['code']) ? (int) trim($request['code']) : NULL;
-
-    if (!$message && !$code) {
-      return;
-    }
-
-    switch ($code) {
-      case 101:
-        $this->messenger()->addMessage($this->t('You have been successfully subscribed.'), 'status');
-        break;
-
-      case 201:
-        $this->messenger()->addMessage($this->t('Data must be posted with POST method.'), 'error');
-        break;
-
-      case 204:
-        $this->messenger()->addMessage($this->t('Data does not contain a recognizable email address.'), 'warning');
-        break;
-
-      case 205:
-        $this->messenger()->addMessage($this->t(
-          'Could not add to subscriber list for an unknown reason. Probably something in Smaily.'), 'error');
-        break;
-
-      default:
-        $this->messenger()->addMessage($this->t('Something went wrong, try again later.'), 'error');
-        break;
-    }
   }
 
 }

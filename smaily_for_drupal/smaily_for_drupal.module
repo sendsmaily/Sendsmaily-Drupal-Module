@@ -85,3 +85,38 @@ function smaily_for_drupal_uninstall() {
     $nodeStorage->delete($entities);
   }
 }
+
+/**
+* Implements hook_page_attachments().
+*/
+function smaily_for_drupal_page_attachments(array &$page) {
+  $request = \Drupal::request()->query->all();
+  $message = isset($request['message']) ? trim($request['message']) : NULL;
+  $code = isset($request['code']) ? (int) trim($request['code']) : NULL;
+  if (!$message && !$code) {
+    return;
+  }
+  switch ($code) {
+      case 101:
+        \Drupal::messenger()->addMessage(t('You have been successfully subscribed.'), 'status');
+        break;
+
+      case 201:
+        \Drupal::messenger()->addMessage(t('Data must be posted with POST method.'), 'error');
+        break;
+
+      case 204:
+        \Drupal::messenger()->addMessage(t('Data does not contain a recognizable email address.'), 'warning');
+        break;
+
+      case 205:
+        \Drupal::messenger()->addMessage(t(
+          'Could not add to subscriber list for an unknown reason. Probably something in Smaily.'), 'error');
+        break;
+
+      default:
+        \Drupal::messenger()->addMessage(t('Something went wrong, try again later.'), 'error');
+        break;
+  }
+
+}
