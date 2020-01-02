@@ -176,49 +176,29 @@ class AdminForm extends ConfigFormBase {
       return $ajax_response;
     }
     catch (ClientException $e) {
+      $error_message = $this->t('Something went wrong');
       switch ($e->getResponse()->getStatusCode()) {
-        case 200:
-          // OK code, continue validateCredentials.
+        case 401:
+          $error_message = $this->t('Credentials invalid');
           break;
 
-        case 401:
-          $ajax_response->addCommand(
-            new HtmlCommand(
-              '.smaily_message',
-              '<div class="messages messages--error">' . 'Credentials invalid.' . '</div>')
-          );
-          return $ajax_response;
-
         case 404:
-          $ajax_response->addCommand(
-            new HtmlCommand(
-              '.smaily_message',
-              '<div class="messages messages--error">' . 'Subdomain error' . '</div>')
-          );
-          return $ajax_response;
-
-        default:
-          $ajax_response->addCommand(
-            new HtmlCommand(
-              '.smaily_message',
-              '<div class="messages messages--error">' . 'Something went wrong.' . '</div>')
-          );
-          return $ajax_response;
+        $error_message = $this->t('Subdomain error');
+        break;
       }
 
       $credentials = [
         '@username' => $username,
-        '@password' => $password,
         '@subdomain' => $subdomain,
       ];
       \Drupal::logger('smaily_for_drupal')->error(
-        'Failed trying to validate credentials to Smaily subdomain: @subdomain with credentials: @username & @password',
+        'Failed trying to validate credentials to Smaily with subdomain: @subdomain and username: @username',
         $credentials
       );
       $ajax_response->addCommand(
         new HtmlCommand(
           '.smaily_message',
-          '<div class="messages messages--error">' . 'Something went wrong.' . '</div>')
+          '<div class="messages messages--error">' . $error_message . '</div>')
       );
       return $ajax_response;
     }
