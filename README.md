@@ -34,3 +34,7 @@ Opening new issues and submitting pull requests are welcome.
 - More pages can be created using the Smaily Response Pages content type.
 - "Redirect back" redirects to last page user was on, handles responses with feedback.
 - Smaily API provides a response via URL arguments, these can be accessed with \Drupal::request()->query->all()['message']
+
+## Troubleshooting
+- No response when placing Smaily Newsletter block
+Install PHP cURL library and restart Apache.
