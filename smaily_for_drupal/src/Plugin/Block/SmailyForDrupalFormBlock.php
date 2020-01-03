@@ -5,6 +5,7 @@ namespace Drupal\smaily_for_drupal\Plugin\Block;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use GuzzleHttp\Exception\ClientException;
 
 /**
  * Provides a 'Smaily Newsletter form' block.
@@ -159,24 +160,36 @@ class SmailyForDrupalFormBlock extends BlockBase {
     $domain = $config->get('smaily_api_credentials.domain');
 
     $autoresponder_list = [];
-    if (!empty($domain) && !empty($username) && !empty($password)) {
-      $ch = curl_init();
-      curl_setopt($ch, CURLOPT_URL,
-        'https://' . $domain . '.sendsmaily.net/api/workflows.php?trigger_type=form_submitted'
-      );
-      curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-      curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-      curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
-      $autoresponders = json_decode(curl_exec($ch), TRUE);
-      curl_close($ch);
-
-      if (!empty($autoresponders)) {
-        foreach ($autoresponders as $autoresponder) {
-          if (!empty($autoresponder['id']) && !empty($autoresponder['title'])) {
-            $autoresponder_list[$autoresponder['id']] = trim($autoresponder['title']);
-          }
+    if (empty($domain) && empty($username) && empty($password)) {
+      return $autoresponder_list;
+    }
+    $full_url = 'https://' . $domain . '.sendsmaily.net/api/workflows.php?trigger_type=form_submitted';
+    try {
+      $client = \Drupal::httpClient();
+      $response = $client->request('GET', $full_url, [
+        'auth' => [$username, $password],
+      ]);
+      $autoresponders = json_decode($response->getBody(), TRUE);
+      if (empty($autoresponders)) {
+        return $autoresponder_list;
+      }
+      foreach ($autoresponders as $autoresponder) {
+        if (!empty($autoresponder['id']) && !empty($autoresponder['title'])) {
+          $autoresponder_list[$autoresponder['id']] = trim($autoresponder['title']);
         }
       }
+    }
+    catch (ClientException $e) {
+      $logger_placeholders = [
+        '@username' => $username,
+        '@subdomain' => $domain,
+        '@statuscode' => $e->getResponse()->getStatusCode(),
+      ];
+
+      \Drupal::logger('smaily_for_drupal')->error(
+        'HTTP status code: @statuscode Failed trying to fetch autoresponders from Smaily with subdomain: @subdomain and username: @username',
+        $logger_placeholders
+      );
     }
     return $autoresponder_list;
   }

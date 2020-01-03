@@ -6,6 +6,7 @@ use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\HtmlCommand;
+use GuzzleHttp\Exception\ClientException;
 
 /**
  * Smaily module admin configuraiton form.
@@ -154,58 +155,54 @@ class AdminForm extends ConfigFormBase {
     }
 
     $subdomain = $this->normalizeSubdomain($subdomain);
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL,
-      'https://' . $subdomain . '.sendsmaily.net/api/workflows.php?trigger_type=form_submitted'
-    );
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-    curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
-    curl_exec($ch);
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
+    $url = 'https://' . $subdomain . '.sendsmaily.net/api/workflows.php?trigger_type=form_submitted';
 
-    switch ((int) $http_code) {
-      case 200:
-        // OK code, continue validateCredentials.
-        break;
+    try {
+      $client = \Drupal::httpClient();
+      $client->request('GET', $url, [
+        'auth' => [$username, $password],
+      ]);
 
-      case 401:
-        $ajax_response->addCommand(
-          new HtmlCommand(
-            '.smaily_message',
-            '<div class="messages messages--error">' . 'Credentials invalid.' . '</div>')
-        );
-        return $ajax_response;
-
-      case 404:
-        $ajax_response->addCommand(
-          new HtmlCommand(
-            '.smaily_message',
-            '<div class="messages messages--error">' . 'Subdomain error' . '</div>')
-        );
-        return $ajax_response;
-
-      default:
-        $ajax_response->addCommand(
-          new HtmlCommand(
-            '.smaily_message',
-            '<div class="messages messages--error">' . 'Something went wrong.' . '</div>')
-        );
-        return $ajax_response;
+      $this->config('smaily_for_drupal.settings')
+        ->set('smaily_api_credentials.domain', $subdomain)
+        ->set('smaily_api_credentials.username', $username)
+        ->set('smaily_api_credentials.password', $password)
+        ->save();
+      $ajax_response->addCommand(
+        new HtmlCommand(
+          '.smaily_message',
+          '<div class="messages messages--status">' . 'Credentials valid' . '</div>')
+      );
+      return $ajax_response;
     }
+    catch (ClientException $e) {
+      $error_message = $this->t('Something went wrong');
+      switch ($e->getResponse()->getStatusCode()) {
+        case 401:
+          $error_message = $this->t('Credentials invalid');
+          break;
 
-    $this->config('smaily_for_drupal.settings')
-      ->set('smaily_api_credentials.domain', $subdomain)
-      ->set('smaily_api_credentials.username', $username)
-      ->set('smaily_api_credentials.password', $password)
-      ->save();
-    $ajax_response->addCommand(
-      new HtmlCommand(
-        '.smaily_message',
-        '<div class="messages messages--status">' . 'Credentials valid' . '</div>')
-    );
-    return $ajax_response;
+        case 404:
+          $error_message = $this->t('Subdomain error');
+          break;
+      }
+
+      $logger_placeholders = [
+        '@username' => $username,
+        '@subdomain' => $subdomain,
+        '@statuscode' => $e->getResponse()->getStatusCode(),
+      ];
+      \Drupal::logger('smaily_for_drupal')->error(
+        'HTTP status code: @statuscode Failed trying to validate credentials to Smaily with subdomain: @subdomain and username: @username',
+        $logger_placeholders
+      );
+      $ajax_response->addCommand(
+        new HtmlCommand(
+          '.smaily_message',
+          '<div class="messages messages--error">' . $error_message . '</div>')
+      );
+      return $ajax_response;
+    }
   }
 
   /**
