@@ -180,14 +180,15 @@ class SmailyForDrupalFormBlock extends BlockBase {
       }
     }
     catch (ClientException $e) {
-      $credentials = [
+      $logger_placeholders = [
         '@username' => $username,
-        '@subdomain' => $subdomain,
+        '@subdomain' => $domain,
+        '@statuscode' => $e->getResponse()->getStatusCode(),
       ];
 
       \Drupal::logger('smaily_for_drupal')->error(
-        'Failed trying to fetch autoresponders from Smaily with subdomain: @subdomain and username: @username',
-        $credentials
+        'HTTP status code: @statuscode Failed trying to fetch autoresponders from Smaily with subdomain: @subdomain and username: @username',
+        $logger_placeholders
       );
     }
     return $autoresponder_list;

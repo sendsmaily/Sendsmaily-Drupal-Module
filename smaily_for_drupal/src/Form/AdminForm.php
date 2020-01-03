@@ -183,17 +183,18 @@ class AdminForm extends ConfigFormBase {
           break;
 
         case 404:
-        $error_message = $this->t('Subdomain error');
-        break;
+          $error_message = $this->t('Subdomain error');
+          break;
       }
 
-      $credentials = [
+      $logger_placeholders = [
         '@username' => $username,
         '@subdomain' => $subdomain,
+        '@statuscode' => $e->getResponse()->getStatusCode(),
       ];
       \Drupal::logger('smaily_for_drupal')->error(
-        'Failed trying to validate credentials to Smaily with subdomain: @subdomain and username: @username',
-        $credentials
+        'HTTP status code: @statuscode Failed trying to validate credentials to Smaily with subdomain: @subdomain and username: @username',
+        $logger_placeholders
       );
       $ajax_response->addCommand(
         new HtmlCommand(
