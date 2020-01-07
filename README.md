@@ -36,5 +36,6 @@ Opening new issues and submitting pull requests are welcome.
 - Smaily API provides a response via URL arguments, these can be accessed with \Drupal::request()->query->all()['message']
 
 ## Troubleshooting
-- No response when placing Smaily Newsletter block
+
+### No response when placing Smaily Newsletter block
 Install PHP cURL library and restart Apache.
