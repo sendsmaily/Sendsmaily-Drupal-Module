@@ -14,7 +14,7 @@ services:
     restart: always
     environment:
       MYSQL_DATABASE: drupal
-      MYSQL_ROOT_PASSWORD: examplepass
+      MYSQL_ROOT_PASSWORD: smaily1
     volumes:
       - database:/var/lib/mysql
 volumes:
