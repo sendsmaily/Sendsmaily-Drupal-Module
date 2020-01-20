@@ -8,7 +8,6 @@ services:
       - 8080:80
     volumes:
       - app:/var/www/html
-
   database:
     image: mysql:5.7
     restart: always
