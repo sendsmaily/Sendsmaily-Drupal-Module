@@ -8,6 +8,7 @@ services:
       - 8080:80
     volumes:
       - app:/var/www/html
+      - ./:/var/www/html/modules/smaily_for_drupal
 
   database:
     image: mysql:5.7
