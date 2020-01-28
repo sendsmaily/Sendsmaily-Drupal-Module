@@ -7,7 +7,6 @@ RUN composer global require drush/drush:8.* \
   && drush core-status -y \
   && rm -rf /var/lib/apt/lists/*
 # Copy Smaily module folder to Drupal folder.
-ADD . /var/www/html/modules/smaily_for_drupal
 RUN chown -R www-data:www-data /var/www \
     && find /var/www -type d -exec chmod 2750 {} \+ \
     && find /var/www -type f -exec chmod 640 {} \+
