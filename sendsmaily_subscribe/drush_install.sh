@@ -23,8 +23,6 @@ else
         --account-mail=testing@smaily.sandbox \
         --account-name=admin \
         --account-pass=smailydev1
-    chmod 755 /var/www/html/modules/sendsmaily_subscribe
-    find /var/www/html/modules/sendsmaily_subscribe -type f -exec chmod 666 {} \+
     drush en -y sendsmaily_subscribe
 fi
 docker-php-entrypoint "$@"
