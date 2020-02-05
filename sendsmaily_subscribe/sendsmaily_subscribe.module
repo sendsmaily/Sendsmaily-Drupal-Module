@@ -111,10 +111,12 @@ function sendsmaily_subscribe_configuration_page() {
     '#required' => TRUE,
   );
 
-  $form['sendsmaily_autoresponder'] = array(
-    '#type' => 'textfield',
+  $form['sendsmaily_autoresponder'] = array (
+    '#type' => 'select',
     '#title' => t('Autoresponder'),
     '#default_value' => variable_get('sendsmaily_autoresponder', ''),
+    '#options' => fetchAutoresponders(),
+    '#empty_option' => t('Select autoresponder'),
   );
 
   $form['sendsmaily_button_title'] = array(
@@ -256,4 +258,58 @@ function sendsmaily_subscribe_block_view($delta = '') {
   }
 
   return $block;
+}
+
+/**
+   * Ask for a list of autoresponders from Smaily.
+   *
+   * @return array
+   *   Array of autoresponders with an id and title for Form select.
+   */
+function fetchAutoresponders() {
+  $username = variable_get('sendsmaily_username', '');
+  $password = variable_get('sendsmaily_password', '');
+  $domain = variable_get('sendsmaily_domain', '');
+
+  $autoresponder_list = [];
+  if (empty($domain) && empty($username) && empty($password)) {
+    return $autoresponder_list;
+  }
+  $full_url = 'https://' . $domain . '.sendsmaily.net/api/workflows.php?trigger_type=form_submitted';
+  try {
+    $response = drupal_http_request($full_url, array(
+      'headers' => array("Authorization: Basic " => base64_encode($username . ':' . $password)),
+      'data' => array(),
+      'method' => 'GET',
+      'timeout' => 1,
+    ));
+    if (!isset($response->data)) {
+      return $autoresponder_list;
+    }
+    $autoresponders = json_decode($response->data, TRUE);
+    if (empty($autoresponders)) {
+      return $autoresponder_list;
+    }
+    foreach ($autoresponders as $autoresponder) {
+      if (!empty($autoresponder['id']) && !empty($autoresponder['title'])) {
+        $autoresponder_list[$autoresponder['id']] = trim($autoresponder['title']);
+      }
+    }
+  }
+
+  catch (\Exception $e) {
+    $logger_placeholders = [
+      '@username' => $username,
+      '@subdomain' => $domain,
+      '@statuscode' => $e->getResponse()->getStatusCode(),
+    ];
+    watchdog(
+      'sendsmaily',
+      'HTTP status code: @statuscode Failed trying to fetch autoresponders from Smaily with subdomain: @subdomain and username: @username',
+      $logger_placeholders,
+      WATCHDOG_NOTICE,
+    );
+  }
+
+  return $autoresponder_list;
 }
