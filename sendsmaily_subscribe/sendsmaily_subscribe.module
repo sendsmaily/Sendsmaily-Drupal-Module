@@ -97,37 +97,21 @@ function sendsmaily_subscribe_configuration_page() {
     '#required' => TRUE,
   );
 
+  $form['sendsmaily_success_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Success URL'),
+    '#default_value' => variable_get('sendsmaily_success_url', ''),
+    '#description' => t('For example: http://example.com Leave blank for redirect back'),
+  );
+
+  $form['sendsmaily_failure_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Failure URL'),
+    '#default_value' => variable_get('sendsmaily_failure_url', ''),
+    '#description' => t('For example: http://example.com Leave blank for redirect back'),
+  );
+
   return system_settings_form($form);
-}
-
-/**
- * Implements hook_form_alter().
- */
-function sendsmaily_subscribe_form_alter(&$form, &$form_state, $form_id) {
-  if ($form_id == 'user_register_form') {
-    // Add the fieldset.
-    $form['sendsmaily'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Subscribe to newsletter'),
-      '#weight' => 10,
-    );
-    // Add the checkbox to the fieldset.
-    $form['sendsmaily']['sendsmaily'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Subscribe to our newsletter'),
-    );
-    // Add submit function.
-    $form['#submit'][] = 'sendsmaily_subscribe_json_submit';
-  }
-}
-
-/**
- * Callback for sendsmaily_subscribe_form_alter().
- */
-function sendsmaily_subscribe_json_submit($form, &$form_state) {
-  if ($form_state['values']['sendsmaily'] === 1) {
-    $json = _sendsmaily_subscribe_curl($form_state['values']['mail']);
-  }
 }
 
 /**
@@ -147,9 +131,7 @@ function sendsmaily_subscribe_block_info() {
  * Implements hook_form().
  */
 function sendsmaily_subscribe_form($form, &$form_state) {
-  $form['response'] = array(
-    '#markup' => '<div id="sendsmaily-response"></div><a name="newsletter"></a>',
-  );
+  $form['#action'] = 'https://' . variable_get('sendsmaily_domain', '') . '.sendsmaily.net/api/opt-in/';
 
   $form['name'] = array(
     '#title' => t('Name:'),
@@ -165,47 +147,62 @@ function sendsmaily_subscribe_form($form, &$form_state) {
     '#attributes' => array('placeholder' => t('Email')),
   );
 
+  $form['autoresponder'] = array(
+    '#type' => 'hidden',
+    '#value' => variable_get('sendsmaily_autoresponder', ''),
+  );
+
+  $current_url = url(current_path(), array('absolute' => TRUE));
+  $form['success_url'] = array(
+    '#type' => 'hidden',
+    '#value' => variable_get('sendsmaily_success_url') ?: $current_url,
+  );
+
+  $form['failure_url'] = array(
+    '#type' => 'hidden',
+    '#value' => variable_get('sendsmaily_failure_url') ?: $current_url,
+  );
+
   if (variable_get('sendsmaily_options', '')) {
     $options = array();
     foreach (explode("\n", variable_get('sendsmaily_options', '')) as $line) {
       $values = explode("|", $line);
       $options[trim($values[0])] = trim($values[1]);
     }
-    $form['categories'] = array(
-      '#type' => 'checkboxes',
-      '#options' => $options,
-      '#default_value' => array_keys($options),
-      '#title' => t('Pick which news and updates you would like to receive:'),
-    );
+    foreach ($options as $field => $label) {
+      $form['category_' . $field] = array(
+        '#type' => 'checkbox',
+        '#title' => $label,
+      );
+    }
   }
 
-  $form['join'] = array(
+  $form['join'] = [
+    // #name 'op' is recognized as a custom field by Smaily, leaving it blank here.
+    '#name' => '',
     '#type' => 'submit',
     '#value' => t(variable_get('sendsmaily_button_title', 'Subscribe to newsletter')),
-    '#ajax' => array(
-      'callback' => 'sendsmaily_subscribe_form_callback',
-      'wrapper' => 'sendsmaily-response',
-    ),
-  );
+    '#default_value' => t('Subscribe to newsletter'),
+  ];
+
+  // Remove hidden form elements to not send them to Smaily as a field.
+  $form['#pre_render'][] = 'removeHiddenDrupalInputs';
   return $form;
 }
 
 /**
- * Subscribe form callback.
+ * Remove form_id and form_build_id as to not send them to Smaily as fields.
+ *
+ * @param array $form
+ *   Form before it is rendered for display.
+ *
+ * @return array
+ *   Form without form_id and form_build_id hidden elements.
  */
-function sendsmaily_subscribe_form_callback($form, &$form_state) {
-  if (!valid_email_address($form_state['values']['email'])) {
-    return '<div id="sendsmaily-response">' . t('The e-mail address you specified is not valid.') . '</div>';
-  }
-  else {
-    $response = _sendsmaily_subscribe_curl($form_state['values']['email'], $form_state['values']['name'], $form_state['values']['categories']);
-    if ($response === TRUE) {
-      return '<div id="sendsmaily-response"><script>jQuery("#sendsmaily-subscribe-form .form-item-email, #sendsmaily-subscribe-form .form-item-name, #sendsmaily-subscribe-form .form-item-categories, #edit-join").remove();</script>' . t('You have successfully subscribed!') . '</div>';
-    }
-    else {
-      return '<div id="sendsmaily-response"><script>jQuery("#sendsmaily-subscribe-form .form-item-email, #sendsmaily-subscribe-form .form-item-name, #edit-join").remove();</script>' . $response . '</div>';
-    }
-  }
+function removeHiddenDrupalInputs(array $form) {
+  unset($form['form_build_id']);
+  unset($form['form_id']);
+  return $form;
 }
 
 /**
@@ -231,62 +228,4 @@ function sendsmaily_subscribe_block_view($delta = '') {
   }
 
   return $block;
-}
-
-/**
- * Sendsmaily curl post.
- */
-function _sendsmaily_subscribe_curl($mail, $name = '', $categories = array()) {
-  $array = array(
-    'key' => variable_get('sendsmaily_key', ''),
-    'autoresponder' => variable_get('sendsmaily_autoresponder', 1),
-    'remote' => 1,
-    'email' => $mail,
-  );
-  if (!empty($name)) {
-    $array['name'] = $name;
-  }
-  if (count($categories) > 0) {
-    $options = explode("\n", variable_get('sendsmaily_options', ''));
-    foreach ($options as $line) {
-      $values = explode("|", $line);
-      if ($categories[trim($values[0])]) {
-        $array['category_' . trim($values[0])] = 1;
-      }
-      else {
-        $array['category_' . trim($values[0])] = 0;
-      }
-    }
-  }
-
-  $query = http_build_query($array);
-  $ch = curl_init();
-  curl_setopt($ch, CURLOPT_URL, 'https://' . variable_get('sendsmaily_domain', '') . '.sendsmaily.net/api/opt-in/');
-  curl_setopt($ch, CURLOPT_POST, TRUE);
-  curl_setopt($ch, CURLOPT_POSTFIELDS, $query);
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-  curl_setopt($ch, CURLOPT_HEADER, FALSE);
-
-  $response = curl_exec($ch);
-  $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-  curl_close($ch);
-
-  if ($http_code !== 200) {
-    return t('Could not subscribe! Check domain in Sendsmaily configuration.');
-  }
-  else {
-    // Parse response.
-    $response = json_decode($response);
-
-    if ($response->code >= 200) {
-      watchdog('sendsmaily', $response->message . '<br />' . nl2br(print_r((array_merge(array('query_parameters' => $array), array('response' => (array) $response))), TRUE)), array(), WATCHDOG_NOTICE);
-      if (isset($response->message)) {
-        return t('Could not subscribe!') . ' ' . t($response->message);
-      }
-      return t('Could not subscribe!');
-    }
-    else {
-      return TRUE;
-    }
-  }
 }
