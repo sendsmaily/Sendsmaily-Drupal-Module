@@ -86,8 +86,7 @@ function sendsmaily_subscribe_configuration_page() {
   $form['sendsmaily_autoresponder'] = array(
     '#type' => 'textfield',
     '#title' => t('Autoresponder'),
-    '#default_value' => variable_get('sendsmaily_autoresponder', 1),
-    '#required' => TRUE,
+    '#default_value' => variable_get('sendsmaily_autoresponder', ''),
   );
 
   $form['sendsmaily_button_title'] = array(
