@@ -62,6 +62,24 @@ function sendsmaily_subscribe_permission() {
 function sendsmaily_subscribe_configuration_page() {
   $form = array();
 
+  // Wrapper for editing and returning form data with ajax.
+  $form['sendsmaily_container'] = [
+    '#type' => 'container',
+    '#attributes' => [
+      'id' => 'sendsmaily-wrapper',
+    ],
+  ];
+
+  $form['sendsmaily_container']['sendsmaily_api_credentials'] = [
+    '#type' => 'fieldset',
+    '#title' => t('API credentials'),
+  ];
+
+  $form['sendsmaily_container']['sendsmaily_api_credentials']['message'] = [
+    '#type' => 'markup',
+    '#markup' => '<div class="sendsmaily_message"></div>',
+  ];
+
   $form['sendsmaily_options'] = array(
     '#title' => t('Subscription options'),
     '#type' => 'textarea',
@@ -69,17 +87,27 @@ function sendsmaily_subscribe_configuration_page() {
     '#default_value' => variable_get('sendsmaily_options', ''),
   );
 
-  $form['sendsmaily_domain'] = array(
+  $form['sendsmaily_container']['sendsmaily_api_credentials']['sendsmaily_domain'] = array(
     '#type' => 'textfield',
     '#title' => t('Domain'),
     '#default_value' => variable_get('sendsmaily_domain', ''),
+    '#attributes' => [
+      'placeholder' => t('For example "demo" from https://demo.sendsmaily.net/'),
+    ],
     '#required' => TRUE,
   );
 
-  $form['sendsmaily_key'] = array(
+  $form['sendsmaily_container']['sendsmaily_api_credentials']['sendsmaily_username'] = array(
     '#type' => 'textfield',
-    '#title' => t('API Key'),
-    '#default_value' => variable_get('sendsmaily_key', ''),
+    '#title' => t('Username'),
+    '#default_value' => variable_get('sendsmaily_username', ''),
+    '#required' => TRUE,
+  );
+
+  $form['sendsmaily_container']['sendsmaily_api_credentials']['sendsmaily_password'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Password'),
+    '#default_value' => variable_get('sendsmaily_password', ''),
     '#required' => TRUE,
   );
 
