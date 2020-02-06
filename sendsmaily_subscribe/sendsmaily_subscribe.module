@@ -100,14 +100,14 @@ function sendsmaily_subscribe_configuration_page() {
     '#type' => 'textfield',
     '#title' => t('Success URL'),
     '#default_value' => variable_get('sendsmaily_success_url', ''),
-    '#description' => t('For example: http://example.com Leave blank for redirect back'),
+    '#description' => t('For example https://example.com/welcome. Leave blank for redirect back to page where form was submitted from.'),
   );
 
   $form['sendsmaily_failure_url'] = array(
     '#type' => 'textfield',
     '#title' => t('Failure URL'),
     '#default_value' => variable_get('sendsmaily_failure_url', ''),
-    '#description' => t('For example: http://example.com Leave blank for redirect back'),
+    '#description' => t('For example: http://example.com. Leave blank for redirect back to page where form was submitted from.'),
   );
 
   return system_settings_form($form);
