@@ -62,32 +62,19 @@ function sendsmaily_subscribe_permission() {
 function sendsmaily_subscribe_configuration_page() {
   $form = array();
 
-  // Wrapper for editing and returning form data with ajax.
-  $form['sendsmaily_container'] = [
-    '#type' => 'container',
-    '#attributes' => [
-      'id' => 'sendsmaily-wrapper',
-    ],
+  $form['sendsmaily_message'] = [
+    '#type' => 'markup',
+    '#prefix' => '<div id="sendsmaily-wrapper">',
+    '#suffix' => '</div>',
+    '#markup' => '<h1>' . t('Authentication') . '</h1>',
   ];
 
-  $form['sendsmaily_container']['sendsmaily_api_credentials'] = [
+  $form['sendsmaily_api_credentials'] = [
     '#type' => 'fieldset',
     '#title' => t('API credentials'),
   ];
 
-  $form['sendsmaily_container']['sendsmaily_api_credentials']['message'] = [
-    '#type' => 'markup',
-    '#markup' => '<div class="sendsmaily_message"></div>',
-  ];
-
-  $form['sendsmaily_options'] = array(
-    '#title' => t('Subscription options'),
-    '#type' => 'textarea',
-    '#description' => t('List of key-value pairs on separated rows, that will be displayed on the registration form as checkboxes. ie. subscription1|Main news'),
-    '#default_value' => variable_get('sendsmaily_options', ''),
-  );
-
-  $form['sendsmaily_container']['sendsmaily_api_credentials']['sendsmaily_domain'] = array(
+  $form['sendsmaily_api_credentials']['sendsmaily_domain'] = array(
     '#type' => 'textfield',
     '#title' => t('Domain'),
     '#default_value' => variable_get('sendsmaily_domain', ''),
@@ -97,19 +84,29 @@ function sendsmaily_subscribe_configuration_page() {
     '#required' => TRUE,
   );
 
-  $form['sendsmaily_container']['sendsmaily_api_credentials']['sendsmaily_username'] = array(
+  $form['sendsmaily_api_credentials']['sendsmaily_username'] = array(
     '#type' => 'textfield',
     '#title' => t('Username'),
     '#default_value' => variable_get('sendsmaily_username', ''),
     '#required' => TRUE,
   );
 
-  $form['sendsmaily_container']['sendsmaily_api_credentials']['sendsmaily_password'] = array(
+  $form['sendsmaily_api_credentials']['sendsmaily_password'] = array(
     '#type' => 'textfield',
     '#title' => t('Password'),
     '#default_value' => variable_get('sendsmaily_password', ''),
     '#required' => TRUE,
   );
+
+  $form['sendsmaily_api_credentials']['button_validate_credentials'] = [
+    '#type' => 'button',
+    '#value' => t('Validate credentials'),
+    '#ajax' => [
+      'event' => 'click',
+      'callback' => 'ajax_sendsmaily_validation_callback',
+      'wrapper' => 'sendsmaily-wrapper',
+    ],
+  ];
 
   $form['sendsmaily_autoresponder'] = array (
     '#type' => 'select',
@@ -140,6 +137,12 @@ function sendsmaily_subscribe_configuration_page() {
     '#description' => t('For example: http://example.com Leave blank for redirect back'),
   );
 
+  $form['sendsmaily_options'] = array(
+    '#title' => t('Subscription options'),
+    '#type' => 'textarea',
+    '#description' => t('List of key-value pairs on separated rows, that will be displayed on the registration form as checkboxes. ie. subscription1|Main news'),
+    '#default_value' => variable_get('sendsmaily_options', ''),
+  );
   return system_settings_form($form);
 }
 
