@@ -1,4 +1,4 @@
-version: '2'
+version: '2.3'
 
 services:
   app:
@@ -8,7 +8,7 @@ services:
       - 8080:80
     volumes:
       - app:/var/www/html
-      - ./:/var/www/html/modules/smaily_for_drupal
+      - ./:/var/www/html/sites/all/modules/sendsmaily_subscribe
 
   database:
     image: mysql:5.7
@@ -18,6 +18,7 @@ services:
       MYSQL_ROOT_PASSWORD: smaily1
     volumes:
       - database:/var/lib/mysql
+
   phpmyadmin:
     depends_on:
       - database
@@ -28,6 +29,7 @@ services:
     environment:
       PMA_HOST: database
       MYSQL_ROOT_PASSWORD: smaily1
+
 volumes:
   app:
   database:

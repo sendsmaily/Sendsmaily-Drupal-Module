@@ -1,21 +1,20 @@
 #!/bin/sh
-# Returns true once MySQL has fully loaded
+
+# Wait for MySQL to start.
 mysql_ready() {
-    mysqladmin ping --host=database --user=root --password=smaily1 > /dev/null 2>&1
+    mysql --host=database --user=root --password=smaily1 --execute "SELECT 1" > /dev/null 2>&1
 }
 while !(mysql_ready)
 do
     sleep 1
-    echo "Waiting for MySQL to finish..."
+    echo "Waiting for MySQL to finish start up..."
 done
 
-echo "MySQL loaded. Starting the main script"
-# Check whether Drupal is installed
+# Ensure Drupal is installed.
 if drush status | grep -q Successful ; then
     echo "Found Drupal installation, continuing..."
 else
-    echo "Drupal not found, starting Drush."
-    cd /var/www/html
+    echo "Drupal not found, installing..."
     drush site-install standard -y --notify global \
         --db-url=mysql://root:smaily1@database/drupal \
         --site-name=Drupal Sandbox \
@@ -23,6 +22,9 @@ else
         --account-mail=testing@smaily.sandbox \
         --account-name=admin \
         --account-pass=smailydev1
+
+    # Enable Smaily for Drupal module.
     drush en -y sendsmaily_subscribe
 fi
+
 docker-php-entrypoint "$@"

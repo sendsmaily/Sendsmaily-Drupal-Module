@@ -10,7 +10,7 @@ Includes a simple sign-up form to add new subscribers to Smaily subscribers list
 - Select autoresponder to send automated emails.
 
 ## Requirements
-- Drupal 8
+- Drupal 7
 
 ## Documentation & Support
 Online documentation with help is available at the [Knowledgebase](http://help.smaily.com/en/support/home).
@@ -22,8 +22,8 @@ Opening new issues and submitting pull requests are welcome.
 
 ## Installation
 
-- Place smaily_for_drupal into core/modules/ folder.
-- Install module under Extend.
+- Place smaily_for_drupal into `sites/all/modules` (or `sites/all/modules/contrib`) directory.
+- Enable module under Modules.
 - Validate and save your Smaily API credentials.
 - Go to Structure -> Block layout.
 - Place "Smaily Newsletter" block where you wish.
@@ -33,7 +33,6 @@ Opening new issues and submitting pull requests are welcome.
 - One success and failure page is created by Smaily for use.
 - More pages can be created using the Smaily Response Pages content type.
 - "Redirect back" redirects to last page user was on, handles responses with feedback.
-- Smaily API provides a response via URL arguments, these can be accessed with \Drupal::request()->query->all()['message']
 
 ## Troubleshooting
 
