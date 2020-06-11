@@ -1,4 +1,4 @@
-name = Sendsmaily Subscribe
+name = Smaily for Drupal
 description = "Sendsmaily integration."
 core = 7.x
 package = Sendsmaily
