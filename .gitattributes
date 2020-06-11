@@ -1,0 +1,4 @@
+/.sandbox export-ignore
+/docker-compose.yaml export-ignore
+/Dockerfile export-ignore
+/README.md export-ignore
